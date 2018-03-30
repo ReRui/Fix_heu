@@ -34,8 +34,8 @@ public class Fix {
 
     public static void main(String[] args) {
         startTime = System.currentTimeMillis();
-//        fix(FixType.firstFix);
-        fix(FixType.iterateFix);
+        fix(FixType.firstFix);
+//        fix(FixType.iterateFix);
         endFixFirstTime = System.currentTimeMillis();
         System.out.println("修复需要的时间:" + (endFixFirstTime - startTime));
 
@@ -288,10 +288,16 @@ public class Fix {
                 line++;
                 if (line == poi) {//找到哪一行
                     String field = node.getField();//得的变量
-                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("^\\s+(\\w+)\\." + field + ".*$");
+                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?((\\w+\\.)?" + field + ").*$");
                     Matcher m = p.matcher(read);
                     if (m.matches()) {
                         result = m.group(1);
+                        int indexTemp = result.indexOf('.');
+                        if (indexTemp == -1) {
+                            result = "this";
+                        } else {
+                            result = result.substring(0, indexTemp);
+                        }
                     } else {
                         result = "this";
                     }

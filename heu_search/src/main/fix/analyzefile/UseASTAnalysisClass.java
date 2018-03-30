@@ -38,20 +38,22 @@ public class UseASTAnalysisClass {
         nodesList.add(new ReadWriteNode(1, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:52"));
         nodesList.add(new ReadWriteNode(2, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:53"));
         System.out.println(assertSameFunction(nodesList, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));*/
-        ReadWriteNode readWriteNode = new ReadWriteNode(2, "Account@1a7", "amount", "WRITE", "Thread-4", "account/Account.java:28");
+       /* ReadWriteNode readWriteNode = new ReadWriteNode(2, "consisitency.Main@15d", "num", "WRITE", "main", "consisitency/Main.java:11");
         ReadWriteNode readWriteNode1 = new ReadWriteNode(2, "Account@1a7", "amount", "WRITE", "Thread-4", "account/Account.java:32");
         List<ReadWriteNode> rwl = new ArrayList<ReadWriteNode>();
         rwl.add(readWriteNode);
         rwl.add(readWriteNode1);
-        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
+        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));*/
 //        useASTCFindLockLine(readWriteNode, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java");
+        useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
+        System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());
     }
 
     //判断变量是不是在if(),while(),for()的判断中
     //注意是判断中，就是圆括号中
     //如果是的话，要稍微修改一下加锁的函数
     public static LockLine changeLockLine(int firstLoc, int lastLoc, String filePath) {
-        System.out.println(firstLoc + "===========");
+//        System.out.println(firstLoc + "===========");
         lockLine.setFirstLoc(firstLoc);
         lockLine.setLastLoc(lastLoc);
         useASTChangeLine(firstLoc, lastLoc, filePath);
@@ -83,11 +85,11 @@ public class UseASTAnalysisClass {
                     ASTNode iNode = node.getParent();
                     while (!(iNode instanceof SynchronizedStatement)) {
                         iNode = iNode.getParent();
-                        if(iNode == null) {
+                        if (iNode == null) {
                             break;
                         }
                     }
-                    existLock = new ExistLock("",cu.getLineNumber(iNode.getStartPosition()),cu.getLineNumber(iNode.getStartPosition() + iNode.getLength()));
+                    existLock = new ExistLock("", cu.getLineNumber(iNode.getStartPosition()), cu.getLineNumber(iNode.getStartPosition() + iNode.getLength()));
                 }
                 return super.visit(node);
             }
@@ -108,12 +110,12 @@ public class UseASTAnalysisClass {
 
             @Override
             public boolean visit(InfixExpression node) {
-                int start = cu.getLineNumber(node.getStartPosition());
-                int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
-                if (firstLoc >= start && lastLoc <= end) {//加锁区域在圆括号的里面
-                    ASTNode parent = node.getParent();
-                    lockLine.setFirstLoc(cu.getLineNumber(parent.getStartPosition()));
-                    lockLine.setLastLoc(cu.getLineNumber(parent.getStartPosition() + parent.getLength()));//此处lastloc不要加1，因为加锁的时候已经是+1了
+                ASTNode parent = node.getParent();
+                int start = cu.getLineNumber(parent.getStartPosition());
+                int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
+                if ((firstLoc <= start && (lastLoc + 1) <= end && (lastLoc + 1) > start) || (firstLoc > start && firstLoc <= end && (lastLoc + 1) > end)) {//加锁区域与代码块交叉的里面
+                    lockLine.setFirstLoc(Math.min(firstLoc, start));
+                    lockLine.setLastLoc(Math.max(lastLoc, end));//此处lastloc不要加1，因为加锁的时候已经是+1了
                 }
                 return super.visit(node);
             }
