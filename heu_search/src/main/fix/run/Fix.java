@@ -34,8 +34,8 @@ public class Fix {
 
     public static void main(String[] args) {
         startTime = System.currentTimeMillis();
-        fix(FixType.firstFix);
-//        fix(FixType.iterateFix);
+//        fix(FixType.firstFix);
+        fix(FixType.iterateFix);
         endFixFirstTime = System.currentTimeMillis();
         System.out.println("修复需要的时间:" + (endFixFirstTime - startTime));
 
@@ -52,8 +52,9 @@ public class Fix {
             sourceClassPath = ImportPath.verifyPath + "\\generateClass";
         }
 
-        //拿到第一个元素
-        Unicorn.PatternCounter patternCounter = Unicorn.getPatternCounterList(sourceClassPath).get(0);
+        //拿到最后一个元素
+        List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
+        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1);
 
         endUnicornTime = System.currentTimeMillis();
         System.out.println("得到pattern的时间:" + (endUnicornTime - startTime));
@@ -175,8 +176,8 @@ public class Fix {
                             return;//直接结束
                         } else {
                             varHasLock = true;//有锁标为true
-//                            existLock = existLockName(rwnList.get(i));
-                            existLock = null;
+                            existLock = existLockName(rwnList.get(i));
+//                            existLock = null;
                         }
                     }
                     //应该要加什么锁
@@ -266,7 +267,7 @@ public class Fix {
         }
 
         //关联变量处理
-        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+//        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
             fixMethods += "对" + rwnList.get(0) + "加锁起止位置" + firstLoc + "->" + lastLoc + '\n';
@@ -329,7 +330,7 @@ public class Fix {
                 writeNode = patternCounter.getNodes()[i];
             }
         }
-System.out.println("read" + readNode);
+
         System.out.println("write" + writeNode);
         System.out.println(!RecordSequence.isLast(readNode));
         System.out.println(!RecordSequence.isFirst(writeNode));
@@ -356,7 +357,7 @@ System.out.println("read" + readNode);
             rwnList.add(patternCounter.getNodes()[i]);
         }
         boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
-        System.out.println("在不在一个函数中" + flagSame);
+        System.out.println("在不在一个函数中" + flagSame + "," + rwnList);
         if (flagSame) {//在一个函数中
             int oneLoc = Integer.parseInt(patternCounter.getNodes()[0].getPosition().split(":")[1]);
             int twoLoc = Integer.parseInt(patternCounter.getNodes()[1].getPosition().split(":")[1]);

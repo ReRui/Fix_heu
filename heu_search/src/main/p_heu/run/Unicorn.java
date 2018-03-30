@@ -28,7 +28,9 @@ public class Unicorn {
 
     //测试用的main函数
     public static void main(String[] args) {
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
+
+//        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
+        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.getPatternCounterList());
         /*List<PatternCounter> patternCounters = Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch");
         for (PatternCounter p : patternCounters) {
@@ -54,7 +56,7 @@ public class Unicorn {
     }
 
     private static void useUnicorn(int type, String classpath) {
-
+//        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 
@@ -81,8 +83,8 @@ public class Unicorn {
             JPF jpf = new JPF(config);
             SequenceProduceListener listener = new SequenceProduceListener();
 
-            Filter filter = Filter.createFilePathFilter();
-            listener.setPositionFilter(filter);
+            /*Filter filter = Filter.createFilePathFilter();
+            listener.setPositionFilter(filter);*/
 
             jpf.addListener(listener);
             jpf.run();
@@ -121,7 +123,8 @@ public class Unicorn {
             public int compare(PatternCounter o1, PatternCounter o2) {
                 double r1 = (double) o1.getSuccessCount() / (o1.getSuccessCount() + o1.getFailCount());
                 double r2 = (double) o2.getSuccessCount() / (o2.getSuccessCount() + o2.getFailCount());
-                return Double.compare(r1, r2);
+                return -Double.compare(r1, r2) == 0 ?
+                        Integer.compare(o1.getFailCount(), o2.getFailCount()) : -Double.compare(r1, r2);//changed
             }
         });
     }
