@@ -54,7 +54,7 @@ public class Fix {
 
         //拿到最后一个元素
         List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
-        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1);
+        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 8);
 
         endUnicornTime = System.currentTimeMillis();
         System.out.println("得到pattern的时间:" + (endUnicornTime - startTime));
@@ -69,7 +69,8 @@ public class Fix {
         InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "修复得到的sequence");
 
         //根据pattern知道需要在哪个类中加锁
-        whichCLassNeedSync = patternCounter.getPattern().getNodes()[0].getPosition().split(":")[0].split("/")[1];
+        String[] tempSplit = patternCounter.getPattern().getNodes()[0].getPosition().split(":")[0].split("/");
+        whichCLassNeedSync = tempSplit[tempSplit.length - 1];
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
