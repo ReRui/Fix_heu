@@ -196,11 +196,18 @@ public class LockAdjust {
                         equalLineNumber = oneFirstLoc;
                     }
                     if (line == equalLineNumber) {
-                        int index = read.indexOf('}');//找到上个加锁的右括号
+                        //这段代码原来的逻辑是这样
+                        //如果相邻两行加锁，则加它们修改一下，避免出现第二次加锁的左括号和第一次加锁的右括号重合
+                        /*int index = read.indexOf('}');//找到上个加锁的右括号
                         read = read.substring(0, index) + read.substring(index + 1);//删除右括号
                         StringBuilder sb = new StringBuilder(read);
                         sb.insert(0, '}');//在行首添加一个右括号
-                        read = sb.toString();
+                        read = sb.toString();*/
+
+                        //但是现在，在运行even程序的时候，发现将相邻的加锁两行合并才好
+                        //所以改成了这样，直接删除
+                        int index = read.indexOf('{');//找到上个加锁的右括号
+                        read = read.substring(index + 1);//直接把这部分都删了
                     }
                 }
 

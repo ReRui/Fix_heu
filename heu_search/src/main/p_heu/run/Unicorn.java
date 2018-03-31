@@ -31,8 +31,9 @@ public class Unicorn {
 
         GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.getPatternCounterList());
 //        System.out.println(Unicorn.getPatternCounterList());
         /*List<PatternCounter> patternCounters = Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch");
         for (PatternCounter p : patternCounters) {

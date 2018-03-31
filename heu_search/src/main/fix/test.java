@@ -15,6 +15,12 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 
 public class Test {
+    static  int tettt = 0;
+    public void m() {
+        synchronized (this) {
+            tettt = 1;
+        }
+    }
     public static void main(String[] args) {
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
@@ -32,7 +38,7 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-//        useASTChangeLine(50,51,"D:\\Patch\\examples\\critical\\Critical.java");
+        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
@@ -45,7 +51,7 @@ public class Test {
         if (m.matches()) {
             result = m.group(1);
             int indexTemp = result.indexOf('.');
-            if(indexTemp == -1)
+            if (indexTemp == -1)
                 result = "this";
             else
                 result = result.substring(0, indexTemp);
@@ -62,14 +68,29 @@ public class Test {
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
-
+        /*char[] fileContents = getFileContents(new File(filePath));
+        for (char c : fileContents)
+            System.out.print(c);
+*/
         final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
         cu.accept(new ASTVisitor() {
 
             @Override
+            public void endVisit(MethodDeclaration node) {
+                System.out.println(node);
+                super.endVisit(node);
+            }
+
+            /*@Override
+            public boolean visit(SimpleName node) {
+                System.out.println(node + "," + cu.getLineNumber(node.getStartPosition()));
+                return super.visit(node);
+            }
+*/
+            @Override
             public boolean visit(InfixExpression node) {
-                ASTNode parent = node.getParent();
+               /* ASTNode parent = node.getParent();
                 int start = cu.getLineNumber(parent.getStartPosition());
                 int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
                 System.out.println(start);
@@ -77,7 +98,7 @@ public class Test {
                 System.out.println(parent);
                 if (firstLoc >= start && lastLoc <= end) {//加锁区域在括号的里面
                     System.out.println("yes");
-                }
+                }*/
 
                 return super.visit(node);
             }

@@ -38,15 +38,15 @@ public class UseASTAnalysisClass {
         nodesList.add(new ReadWriteNode(1, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:52"));
         nodesList.add(new ReadWriteNode(2, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:53"));
         System.out.println(assertSameFunction(nodesList, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));*/
-       /* ReadWriteNode readWriteNode = new ReadWriteNode(2, "consisitency.Main@15d", "num", "WRITE", "main", "consisitency/Main.java:11");
-        ReadWriteNode readWriteNode1 = new ReadWriteNode(2, "Account@1a7", "amount", "WRITE", "Thread-4", "account/Account.java:32");
+        ReadWriteNode readWriteNode = new ReadWriteNode(2, "checkfield.InstanceExample@15f", "number", "WRITE", "123", "checkfield/CheckField.java:11");
+        ReadWriteNode readWriteNode1 = new ReadWriteNode(4, "checkfield.InstanceExample@15f", "number", "READ", "123", "checkfield/CheckField.java:13");
         List<ReadWriteNode> rwl = new ArrayList<ReadWriteNode>();
         rwl.add(readWriteNode);
         rwl.add(readWriteNode1);
-        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));*/
+        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java"));
 //        useASTCFindLockLine(readWriteNode, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java");
-        useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
-        System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());
+        /*useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
+        System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -161,6 +161,7 @@ public class UseASTAnalysisClass {
 
             //变量
             public boolean visit(SimpleName node) {
+                System.out.println(node+"====" + cu.getLineNumber(node.getStartPosition()));
                 // if (this.names.contains(node.getIdentifier())) {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
                    /* System.out.println(rwn1.getField() + "," + Integer.parseInt(rwn1.getPosition().split(":")[1]));
@@ -176,6 +177,7 @@ public class UseASTAnalysisClass {
                 }
 
                 if (rw1Match && rw2Match) {//两个读写点都找到的时候
+                    System.out.println("都找到了");
                     flagSameFunction = isSameFunction(rw1Node, rw2Node);
                 }
                 //  }

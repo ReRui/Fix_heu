@@ -52,9 +52,29 @@ public class Fix {
             sourceClassPath = ImportPath.verifyPath + "\\generateClass";
         }
 
+
         //拿到最后一个元素
         List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
-        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 8);
+
+        //将长度为2的删除
+        for(int i = tempList.size() - 1;i >=0; i--) {
+            if(tempList.get(i).getPattern().getNodes().length == 2)
+                tempList.remove(i);
+        }
+        System.out.println("list"+tempList);
+        Unicorn.PatternCounter patternCounter = null;
+        for(int i = tempList.size() - 1;i >=0; i--) {
+            ReadWriteNode[] nodes = tempList.get(i).getPattern().getNodes();
+            int a = Integer.parseInt(nodes[0].getPosition().split(":")[1]);
+            int b = Integer.parseInt(nodes[1].getPosition().split(":")[1]);
+            int c = Integer.parseInt(nodes[2].getPosition().split(":")[1]);
+            if(a != b &&a != c && b!= c) {
+                patternCounter = tempList.get(i);
+                break;
+            }
+        }
+        System.out.println("zheshi" + patternCounter);
+//        System.exit(-1);
 
         endUnicornTime = System.currentTimeMillis();
         System.out.println("得到pattern的时间:" + (endUnicornTime - startTime));
@@ -163,7 +183,7 @@ public class Fix {
             //如果有两个变量，需要分析
             //判断它们在不在一个函数中
             boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
-//            System.out.println("判断在不在同一个函数" + flagSame);
+            System.out.println("判断在不在同一个函数" + flagSame);
             if (flagSame) {//在一个函数中
                 //先找找原来有没有锁
                 boolean varHasLock = false;//记录当前pattern是否加锁
@@ -268,7 +288,7 @@ public class Fix {
         }
 
         //关联变量处理
-//        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
             fixMethods += "对" + rwnList.get(0) + "加锁起止位置" + firstLoc + "->" + lastLoc + '\n';
