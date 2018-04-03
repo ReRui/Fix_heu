@@ -57,13 +57,17 @@ public class Fix {
         List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
 
         //将长度为2的删除
-        for(int i = tempList.size() - 1;i >=0; i--) {
+        //实际上对，理论上考虑不全面
+        /*for(int i = tempList.size() - 1;i >=0; i--) {
             if(tempList.get(i).getPattern().getNodes().length == 2)
                 tempList.remove(i);
-        }
-        System.out.println("list"+tempList);
-        Unicorn.PatternCounter patternCounter = null;
-        for(int i = tempList.size() - 1;i >=0; i--) {
+        }*/
+
+//        System.out.println("list"+tempList);
+
+        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1);
+        //这块是为了找打特殊的几个变量
+        /*for(int i = tempList.size() - 1;i >=0; i--) {
             ReadWriteNode[] nodes = tempList.get(i).getPattern().getNodes();
             int a = Integer.parseInt(nodes[0].getPosition().split(":")[1]);
             int b = Integer.parseInt(nodes[1].getPosition().split(":")[1]);
@@ -73,7 +77,7 @@ public class Fix {
                 break;
             }
         }
-        System.out.println("zheshi" + patternCounter);
+        System.out.println("zheshi" + patternCounter);*/
 //        System.exit(-1);
 
         endUnicornTime = System.currentTimeMillis();
@@ -358,9 +362,9 @@ public class Fix {
             }
         }
 
-        System.out.println("write" + writeNode);
+        /*System.out.println("write" + writeNode);
         System.out.println(!RecordSequence.isLast(readNode));
-        System.out.println(!RecordSequence.isFirst(writeNode));
+        System.out.println(!RecordSequence.isFirst(writeNode));*/
 
         if (readNode != null && writeNode != null && (!RecordSequence.isLast(readNode) || !RecordSequence.isFirst(writeNode))) {
             fixMethods += "添加同步\n";

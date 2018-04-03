@@ -28,11 +28,17 @@ public class Unicorn {
 
     //测试用的main函数
     public static void main(String[] args) {
+        /*System.setProperty("user.dir", "C:\\Users\\lhr\\Desktop\\verify\\HashSet");
+        System.setProperty("projectName", "HashSet");
 
-        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
-//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
+        System.out.println(System.getProperty("projectName"));*/
+
+//        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
+        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
-        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
+//        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\HashSet\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
 //        System.out.println(Unicorn.getPatternCounterList());
         /*List<PatternCounter> patternCounters = Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch");
@@ -59,7 +65,7 @@ public class Unicorn {
     }
 
     private static void useUnicorn(int type, String classpath) {
-//        Pattern.setPatternSet("unicorn");
+        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 
@@ -81,6 +87,7 @@ public class Unicorn {
                     "+classpath=" + classpath,
                     "+search.class=p_heu.search.SingleExecutionSearch",
                     ImportPath.projectName + "." + ImportPath.mainClassName
+//                    "benchmarks.dstest.MTSetTest"
             };
             Config config = new Config(str);
             JPF jpf = new JPF(config);

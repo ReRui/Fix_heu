@@ -16,12 +16,12 @@ import java.util.regex.Matcher;
 
 public class Test {
     static  int tettt = 0;
-    public void m() {
-        synchronized (this) {
+
+    public static void main(String[] args) {
+        Object obj = new Object();
+        synchronized (obj) {
             tettt = 1;
         }
-    }
-    public static void main(String[] args) {
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",
@@ -38,7 +38,7 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java");
+        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MergeSort.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
@@ -75,6 +75,12 @@ public class Test {
         final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
         cu.accept(new ASTVisitor() {
+
+            @Override
+            public void endVisit(TypeDeclaration node) {
+                System.out.println(node);
+                super.endVisit(node);
+            }
 
             @Override
             public void endVisit(MethodDeclaration node) {
