@@ -13,6 +13,7 @@ import p_heu.run.Unicorn;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class Fix {
@@ -63,9 +64,12 @@ public class Fix {
                 tempList.remove(i);
         }*/
 
-//        System.out.println("list"+tempList);
+        System.out.println(tempList);
 
-        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1);
+        Scanner sc= new Scanner(System.in);
+        int whichToUse = sc.nextInt();//使用第几个pattern
+        System.out.println(whichToUse);
+        Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);
         //这块是为了找打特殊的几个变量
         /*for(int i = tempList.size() - 1;i >=0; i--) {
             ReadWriteNode[] nodes = tempList.get(i).getPattern().getNodes();

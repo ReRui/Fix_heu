@@ -11,9 +11,9 @@ public class ImportPath {
 //    public static String examplesRootPath = "C:\\Users\\lhr\\Desktop\\test\\Grail\\grail-soot24\\classes";
     //具体到某个项目的包名称
 //    public static String projectName = "account";
-    public static String projectName = "org.apache.log4j";
+    public static String projectName = "producerConsumer";
     //这个项目的主类名称
-    public static String mainClassName = "TestThrowableStrRep";
+    public static String mainClassName = "ProducerConsumer";
     //临时文件的目录，不用太在意，反正用完就删
     public static String tempFile = "D:\\Patch\\temp.java";
     //验证程序的路径

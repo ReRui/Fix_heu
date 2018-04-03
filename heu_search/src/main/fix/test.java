@@ -12,16 +12,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class Test {
     static  int tettt = 0;
 
     public static void main(String[] args) {
-        Object obj = new Object();
-        synchronized (obj) {
-            tettt = 1;
-        }
+        int[] a= {1,2,3,4};
+        for (int i = 0;i < a.length; i++)
+            System.out.println(a[i]);
+        Scanner sc= new Scanner(System.in);
+        int i = sc.nextInt();
+        System.out.println(a[i]);
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",
@@ -38,7 +41,7 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MergeSort.java");
+//        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MergeSort.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
