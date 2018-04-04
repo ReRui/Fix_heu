@@ -7,11 +7,11 @@ import gov.nasa.jpf.JPF;
 import org.eclipse.jdt.core.dom.*;
 import p_heu.entity.filter.Filter;
 import p_heu.listener.SequenceProduceListener;
+import p_heu.run.GenerateClass;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -20,11 +20,28 @@ public class Test {
 
     public static void main(String[] args) {
 
-        File file = new File("D:\\Patch\\examples\\org\\apache\\log4j");
-        File[] fileArr = file.listFiles();
-        /*for(int i = 0;i < fileArr.length; i++)
-            System.out.println(fileArr[i]);*/
-        System.out.println(file);
+        String path = "D:\\Patch\\exportExamples\\org\\apache\\log4j";
+        /*File src = new File(path);
+        File dest = new File("C:\\Users\\lhr\\Desktop\\a");
+        try {
+            copyFolder(src,dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        File root = new File(path);
+        List<File> files = new ArrayList<File>();
+        listFiles(files, root);
+        List<String> list = new ArrayList<String>();
+        for(File f : files)
+            list.add(f.toString());
+//        System.out.println(list);
+       try {
+            GenerateClass.compile(list, "C:\\Users\\lhr\\Desktop\\a");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",
@@ -62,6 +79,45 @@ public class Test {
             result = "this";
         }
         System.out.println(result);
+    }
+
+    private static void copyFolder(File src, File dest) throws IOException {
+        if (src.isDirectory()) {
+            if (!dest.exists()) {
+                dest.mkdir();
+            }
+            String files[] = src.list();
+            for (String file : files) {
+                File srcFile = new File(src, file);
+                File destFile = new File(dest, file);
+                // µÝ¹é¸´ÖÆ
+                copyFolder(srcFile, destFile);
+            }
+        } else {
+            InputStream in = new FileInputStream(src);
+            OutputStream out = new FileOutputStream(dest);
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+            in.close();
+            out.close();
+        }
+    }
+
+    static void listFiles(List<File> files, File dir){
+        File[] listFiles = dir.listFiles();
+        for(File f: listFiles){
+            if(f.isFile()){
+                files.add(f);
+            }else if(f.isDirectory()){
+                listFiles(files, f);
+            }
+        }
     }
 
 

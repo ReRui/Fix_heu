@@ -161,7 +161,6 @@ public class UseASTAnalysisClass {
 
             //变量
             public boolean visit(SimpleName node) {
-                System.out.println(node+"====" + cu.getLineNumber(node.getStartPosition()));
                 // if (this.names.contains(node.getIdentifier())) {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
                    /* System.out.println(rwn1.getField() + "," + Integer.parseInt(rwn1.getPosition().split(":")[1]));
@@ -177,7 +176,6 @@ public class UseASTAnalysisClass {
                 }
 
                 if (rw1Match && rw2Match) {//两个读写点都找到的时候
-                    System.out.println("都找到了");
                     flagSameFunction = isSameFunction(rw1Node, rw2Node);
                 }
                 //  }

@@ -2,17 +2,19 @@ package p_heu.run;
 
 import fix.entity.ImportPath;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GenerateClass {
     public static void main(String[] args) {
+
         compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
+
     }
 
     public static void compileJava(String dirPath, String desk) {
+        //源代码
         //遍历该目录下的所有java文件
         File file = new File(dirPath);
         File[] fileArr = file.listFiles();
@@ -28,9 +30,27 @@ public class GenerateClass {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        /*List<String> fileList = new ArrayList<String>();
+        File src = new File(dirPath);
+
+        if (src.isDirectory()) {
+            fileList.clear();
+            String files[] = src.list();
+            for (String file : files) {
+                fileList.add(file);
+                // 递归复制
+//                copyFolder(srcFile, destFile);
+            }
+        } else {
+            fileList.add(src.toString());
+            compile(fileList, desk);
+        }*/
+
     }
 
-    private static void compile(List<String> files, String dest) throws IOException, InterruptedException {
+
+    public static void compile(List<String> files, String dest) throws IOException, InterruptedException {
         com.sun.tools.javac.Main javac = new com.sun.tools.javac.Main();
 
 //        String[] cpargs = new String[] {"-d", dest, files};

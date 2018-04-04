@@ -18,9 +18,9 @@ import java.util.regex.Matcher;
 
 public class Fix {
     static ExamplesIO examplesIO = ExamplesIO.getInstance();
-//    static String dirPath = ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName;//第一次修复的文件路径
-    static String dirPath = ImportPath.examplesRootPath + "\\exportExamples\\org\\apache\\log4j\\spi";//第一次修复的文件路径
-    static String iterateDirPath = ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName;//迭代修复的文件路径
+    static String dirPath = ImportPath.examplesRootPath + "/examples/" + ImportPath.projectName;//第一次修复的文件路径
+//    static String dirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//第一次修复的文件路径
+    static String iterateDirPath = ImportPath.examplesRootPath + "/exportExamples/" + ImportPath.projectName;//迭代修复的文件路径
 
     static String whichCLassNeedSync = "";//需要添加同步的类，此处需不需考虑在不同类之间加锁的情况？
     static LockAdjust lockAdjust = LockAdjust.getInstance();//当锁交叉时，用来合并锁
@@ -28,6 +28,8 @@ public class Fix {
     static String fixMethods = "";//记录修复方法，写入文件中
 
     static String sourceClassPath = "";//源代码的生成类，记录下来，以后用jpf分析class
+
+    static String addSyncFilePath = "";//加锁路径
 
     //用来计时
     static long startTime = 0;
@@ -45,6 +47,12 @@ public class Fix {
 
     private static void fix(int type) {
         String verifyClasspath = ImportPath.verifyPath + "\\generateClass";//要验证的class路径
+
+        //处理包名有几层的情况
+        if(dirPath.contains(".")) {
+            dirPath = dirPath.replaceAll("\\.","/");
+        }
+
         if (type == FixType.firstFix) {
             //先将项目拷贝到exportExamples
 //            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
@@ -53,7 +61,6 @@ public class Fix {
             dirPath = iterateDirPath;
             sourceClassPath = ImportPath.verifyPath + "\\generateClass";
         }
-
 
         //拿到最后一个元素
         List<Unicorn.PatternCounter> tempList = Unicorn.getPatternCounterList(sourceClassPath);
@@ -68,12 +75,22 @@ public class Fix {
         //将所有的pattern打印出来，方便以后选择
         System.out.println(tempList);
 
+        System.out.print("输入准确的pattern：");
         //此处需要手动选择
         Scanner sc= new Scanner(System.in);
         int whichToUse = sc.nextInt();//使用第几个pattern
         //最下面那个是0，依次往上，因为当时排序的时候是倒着排的
 
         Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);
+
+        //根据pattern知道需要在哪个类中加锁
+        String position = patternCounter.getPattern().getNodes()[0].getPosition();
+        String[] tempSplit = position.split(":")[0].split("/");
+        whichCLassNeedSync = tempSplit[tempSplit.length - 1];
+
+        addSyncFilePath = ImportPath.examplesRootPath + "/exportExamples/" + position.split(":")[0];
+
+
         //这块是为了找打特殊的几个变量
         /*for(int i = tempList.size() - 1;i >=0; i--) {
             ReadWriteNode[] nodes = tempList.get(i).getPattern().getNodes();
@@ -100,9 +117,6 @@ public class Fix {
         //将sequence写入文件中
         InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "修复得到的sequence");
 
-        //根据pattern知道需要在哪个类中加锁
-        String[] tempSplit = patternCounter.getPattern().getNodes()[0].getPosition().split(":")[0].split("/");
-        whichCLassNeedSync = tempSplit[tempSplit.length - 1];
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
@@ -183,7 +197,8 @@ public class Fix {
         addSynchronized(threadA);
         lockAdjust.setOneLockFinish(true);//表示第一次执行完
         addSynchronized(threadB);
-        lockAdjust.adjust(dirPath + "\\" + whichCLassNeedSync);//合并锁
+//        lockAdjust.adjust(dirPath + "\\" + whichCLassNeedSync);//合并锁
+        lockAdjust.adjust(addSyncFilePath);//合并锁
     }
 
     private static void addSynchronized(List<ReadWriteNode> rwnList) {
@@ -194,7 +209,8 @@ public class Fix {
         if (rwnList.size() > 1) {//两个变量
             //如果有两个变量，需要分析
             //判断它们在不在一个函数中
-            boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
+//            boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
+            boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
             System.out.println("判断在不在同一个函数" + flagSame);
             if (flagSame) {//在一个函数中
                 //先找找原来有没有锁
@@ -230,19 +246,23 @@ public class Fix {
                     }
                 }
                 //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
-                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync)) {
+//                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync)) {
+                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
 
                     //判断加锁会不会和for循环等交叉
-                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+//                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
 
                     //两个地方都没有加锁
                     if (!varHasLock) {
                         //加锁
-                        examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+//                        examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+                        examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
                     } else {//有加锁的，直接修改原有锁
-                        UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc, existLock.getStartLine(), existLock.getEndLine(), dirPath + "\\" + whichCLassNeedSync);
+//                        UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc, existLock.getStartLine(), existLock.getEndLine(), dirPath + "\\" + whichCLassNeedSync);
+                        UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc, existLock.getStartLine(), existLock.getEndLine(), addSyncFilePath);
                     }
                 }
             } else {//不在一个函数中
@@ -253,16 +273,19 @@ public class Fix {
                     //每个都检查是不是加锁
                     if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {
                         //然后检查是不是成员变量或构造函数
-                        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync)) {
+//                        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync)) {
+                        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
                             //最后得到需要加什么锁
                             lockName = acquireLockName(node);
                             //判断加锁会不会和for循环等交叉
-                            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+//                            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+                            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                             firstLoc = lockLine.getFirstLoc();
                             lastLoc = lockLine.getLastLoc();
 
                             //加锁
-                            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+//                            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+                            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
                         }
                     }
                 }
@@ -278,12 +301,14 @@ public class Fix {
                 lockName = acquireLockName(node);
 
                 //判断加锁会不会和for循环等交叉
-                UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+//                UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+                UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                 firstLoc = lockLine.getFirstLoc();
                 lastLoc = lockLine.getLastLoc();
 
                 //然后加锁
-                examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+//                examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);
+                examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
             }
         }
 
@@ -300,7 +325,8 @@ public class Fix {
         }
 
         //关联变量处理
-        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+//        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//待定
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
             fixMethods += "对" + rwnList.get(0) + "加锁起止位置" + firstLoc + "->" + lastLoc + '\n';
@@ -316,7 +342,8 @@ public class Fix {
         int line = 0;
         int poi = Integer.parseInt(node.getPosition().split(":")[1]);
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(dirPath + "\\" + whichCLassNeedSync)), "UTF-8"));
+//            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(dirPath + "\\" + whichCLassNeedSync)), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(addSyncFilePath)), "UTF-8"));
             while (((read = br.readLine()) != null)) {
                 line++;
                 if (line == poi) {//找到哪一行
@@ -353,7 +380,8 @@ public class Fix {
     //输出锁的名称
     private static ExistLock existLockName(ReadWriteNode node) {
         int number = Integer.parseInt(node.getPosition().split(":")[1]);
-        String filepath = dirPath + "\\" + whichCLassNeedSync;
+//        String filepath = dirPath + "\\" + whichCLassNeedSync;
+        String filepath = addSyncFilePath;
         ExistLock existLock = UseASTAnalysisClass.useASTCFindLockLine(node, filepath);
         existLock = AcquireSyncName.acquireSync(existLock, filepath);
         return existLock;
@@ -395,7 +423,8 @@ public class Fix {
         for (int i = 0; i < patternCounter.getNodes().length; i++) {
             rwnList.add(patternCounter.getNodes()[i]);
         }
-        boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
+//        boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
+        boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
         System.out.println("在不在一个函数中" + flagSame + "," + rwnList);
         if (flagSame) {//在一个函数中
             int oneLoc = Integer.parseInt(patternCounter.getNodes()[0].getPosition().split(":")[1]);
@@ -403,16 +432,19 @@ public class Fix {
             firstLoc = Math.min(oneLoc, twoLoc);
             lastLoc = Math.max(oneLoc, twoLoc);
             String lockName = acquireLockName(patternCounter.getNodes()[0]);
-            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, dirPath + "\\" + whichCLassNeedSync)) {
+//            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, dirPath + "\\" + whichCLassNeedSync)) {
+            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, addSyncFilePath)) {
                 //加锁
                 //检查是否存在锁再加锁
                 if (!CheckWhetherLocked.check(patternCounter.getNodes()[0].getPosition(), patternCounter.getNodes()[0].getField(), sourceClassPath)) {
                     //判断加锁会不会和for循环等交叉
-                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+//                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
                     fixMethods += "加锁位置" + firstLoc + "->" + (lastLoc + 1) + '\n';
-                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+//                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);//待定
                 }
             }
             return;
@@ -431,7 +463,8 @@ public class Fix {
             firstLoc = Integer.parseInt(positionArg[1]);
             lastLoc = firstLoc;
 
-            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, dirPath + "\\" + whichCLassNeedSync)) {
+//            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, dirPath + "\\" + whichCLassNeedSync)) {
+            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, addSyncFilePath)) {
                 //加锁
                 //检查是否存在锁再加锁
                 if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath)) {
@@ -439,7 +472,8 @@ public class Fix {
                     //判断一下能不能用当前的锁直接进行修复
 
                     //判断加锁会不会和for循环等交叉
-                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+//                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, dirPath + "\\" + whichCLassNeedSync);
+                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
                     if (!lockAdjust.isOneLockFinish()) {
@@ -452,9 +486,11 @@ public class Fix {
                         lockAdjust.setTwoFirstLoc(firstLoc);
                         lockAdjust.setTwoLastLoc(lastLoc + 1);
                     }
-                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+//                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, dirPath + "\\" + whichCLassNeedSync);//待定
+                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);//待定
 
-                    lockAdjust.adjust(dirPath + "\\" + whichCLassNeedSync);
+//                    lockAdjust.adjust(dirPath + "\\" + whichCLassNeedSync);
+                    lockAdjust.adjust(addSyncFilePath);
                 }
             }
         }
@@ -477,18 +513,23 @@ public class Fix {
         fixMethods += "信号量使用位置:" + flagAssertLocation + '\n';
 
         //构造函数不能加信号量
-        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, dirPath + "\\" + whichCLassNeedSync) &&
-                !UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, dirPath + "\\" + whichCLassNeedSync)) {
+//        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, dirPath + "\\" + whichCLassNeedSync) &&
+        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, addSyncFilePath) &&
+//                !UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, dirPath + "\\" + whichCLassNeedSync)) {
+                !UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(flagAssertLocation, flagAssertLocation, addSyncFilePath)) {
             //添加信号量的定义
-            examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", dirPath + "\\" + whichCLassNeedSync);//待修订
+//            examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", dirPath + "\\" + whichCLassNeedSync);//待修订
+            examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", addSyncFilePath);//待修订
 
 
             //添加信号量判断,
             //待定，只执行一句我就加了分号，这样是否可行？
-            examplesIO.addVolatileIf(flagAssertLocation, dirPath + "\\" + whichCLassNeedSync);//待修订
+//            examplesIO.addVolatileIf(flagAssertLocation, dirPath + "\\" + whichCLassNeedSync);//待修订
+            examplesIO.addVolatileIf(flagAssertLocation, addSyncFilePath);//待修订
 
             //添加信号为true的那条语句，那条语句应该在定义的后一行
-            examplesIO.addVolatileToTrue(flagDefineLocation + 1, dirPath + "\\" + whichCLassNeedSync);//待修订
+//            examplesIO.addVolatileToTrue(flagDefineLocation + 1, dirPath + "\\" + whichCLassNeedSync);//待修订
+            examplesIO.addVolatileToTrue(flagDefineLocation + 1, addSyncFilePath);//待修订
         }
 
     }
