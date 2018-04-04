@@ -19,12 +19,12 @@ public class Test {
     static  int tettt = 0;
 
     public static void main(String[] args) {
-        int[] a= {1,2,3,4};
-        for (int i = 0;i < a.length; i++)
-            System.out.println(a[i]);
-        Scanner sc= new Scanner(System.in);
-        int i = sc.nextInt();
-        System.out.println(a[i]);
+
+        File file = new File("D:\\Patch\\examples\\org\\apache\\log4j");
+        File[] fileArr = file.listFiles();
+        /*for(int i = 0;i < fileArr.length; i++)
+            System.out.println(fileArr[i]);*/
+        System.out.println(file);
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",

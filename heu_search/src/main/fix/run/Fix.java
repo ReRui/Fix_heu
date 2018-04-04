@@ -18,7 +18,8 @@ import java.util.regex.Matcher;
 
 public class Fix {
     static ExamplesIO examplesIO = ExamplesIO.getInstance();
-    static String dirPath = ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName;//第一次修复的文件路径
+//    static String dirPath = ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName;//第一次修复的文件路径
+    static String dirPath = ImportPath.examplesRootPath + "\\exportExamples\\org\\apache\\log4j\\spi";//第一次修复的文件路径
     static String iterateDirPath = ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName;//迭代修复的文件路径
 
     static String whichCLassNeedSync = "";//需要添加同步的类，此处需不需考虑在不同类之间加锁的情况？
@@ -46,7 +47,7 @@ public class Fix {
         String verifyClasspath = ImportPath.verifyPath + "\\generateClass";//要验证的class路径
         if (type == FixType.firstFix) {
             //先将项目拷贝到exportExamples
-            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
+//            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
             sourceClassPath = ImportPath.examplesRootPath + "\\out\\production\\Patch";
         } else if (type == FixType.iterateFix) {
             dirPath = iterateDirPath;
@@ -64,11 +65,14 @@ public class Fix {
                 tempList.remove(i);
         }*/
 
+        //将所有的pattern打印出来，方便以后选择
         System.out.println(tempList);
 
+        //此处需要手动选择
         Scanner sc= new Scanner(System.in);
         int whichToUse = sc.nextInt();//使用第几个pattern
-        System.out.println(whichToUse);
+        //最下面那个是0，依次往上，因为当时排序的时候是倒着排的
+
         Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);
         //这块是为了找打特殊的几个变量
         /*for(int i = tempList.size() - 1;i >=0; i--) {
