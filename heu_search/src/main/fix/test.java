@@ -2,6 +2,7 @@ package fix;
 
 import fix.analyzefile.UseASTAnalysisClass;
 import fix.entity.ImportPath;
+import fix.io.ExamplesIO;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 import org.eclipse.jdt.core.dom.*;
@@ -17,10 +18,9 @@ import java.util.regex.Matcher;
 
 public class Test {
     static  int tettt = 0;
-
+    static String dirPath = ImportPath.examplesRootPath + "/examples/" + ImportPath.projectName;
     public static void main(String[] args) {
 
-        String path = "D:\\Patch\\exportExamples\\org\\apache\\log4j";
         /*File src = new File(path);
         File dest = new File("C:\\Users\\lhr\\Desktop\\a");
         try {
@@ -28,20 +28,13 @@ public class Test {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-        File root = new File(path);
-        List<File> files = new ArrayList<File>();
-        listFiles(files, root);
-        List<String> list = new ArrayList<String>();
-        for(File f : files)
-            list.add(f.toString());
-//        System.out.println(list);
-       try {
-            GenerateClass.compile(list, "C:\\Users\\lhr\\Desktop\\a");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        //处理包名有几层的情况
+        if(dirPath.contains(".")) {
+            dirPath = dirPath.replaceAll("\\.","/");
         }
+        ExamplesIO eio = ExamplesIO.getInstance();
+        dirPath = eio.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
+        System.out.println(dirPath);
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",
@@ -81,33 +74,6 @@ public class Test {
         System.out.println(result);
     }
 
-    private static void copyFolder(File src, File dest) throws IOException {
-        if (src.isDirectory()) {
-            if (!dest.exists()) {
-                dest.mkdir();
-            }
-            String files[] = src.list();
-            for (String file : files) {
-                File srcFile = new File(src, file);
-                File destFile = new File(dest, file);
-                // 递归复制
-                copyFolder(srcFile, destFile);
-            }
-        } else {
-            InputStream in = new FileInputStream(src);
-            OutputStream out = new FileOutputStream(dest);
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
-            }
-            in.close();
-            out.close();
-        }
-    }
 
     static void listFiles(List<File> files, File dir){
         File[] listFiles = dir.listFiles();

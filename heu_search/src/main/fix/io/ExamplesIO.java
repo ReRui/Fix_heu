@@ -45,46 +45,48 @@ public class ExamplesIO {
         File[] fileArr = file.listFiles();
         //先创建一个copy目录
         changeFilePath = dirPath.replaceAll(dir, targetDir);
-        createDirectory(changeFilePath);
+        File target = createDirectory(changeFilePath);
 
-
-        for (File f : fileArr) {
-            //每个文件，拷贝到另一个目录下。
-            String copyFile = f.getPath().replaceAll(dir, targetDir);
-            CopyFile(f.getPath(), copyFile);
+        try {
+            copyFolder(file, target);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return changeFilePath;
     }
 
-    private void createDirectory(String dirpath) {
-        File dir = new File(dirpath);
-        dir.mkdirs();
+    private static void copyFolder(File src, File dest) throws IOException {
+        if (src.isDirectory()) {
+            if (!dest.exists()) {
+                dest.mkdir();
+            }
+            String files[] = src.list();
+            for (String file : files) {
+                File srcFile = new File(src, file);
+                File destFile = new File(dest, file);
+                // 递归复制
+                copyFolder(srcFile, destFile);
+            }
+        } else {
+            InputStream in = new FileInputStream(src);
+            OutputStream out = new FileOutputStream(dest);
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+            in.close();
+            out.close();
+        }
     }
 
-    private void CopyFile(String filepath, String copyFilepath) {
-        BufferedReader br = null;
-        BufferedWriter bw = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filepath)), "GBK"));
-            bw = new BufferedWriter(new FileWriter(new File(copyFilepath)));
-            String read = "";
-            while (((read = br.readLine()) != null)) {
-                bw.write(read);
-                bw.write('\n');
-                bw.flush();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                br.close();
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    private File createDirectory(String dirpath) {
+        File dir = new File(dirpath);
+        dir.mkdirs();
+        return dir;
     }
 }

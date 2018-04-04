@@ -55,7 +55,7 @@ public class Fix {
 
         if (type == FixType.firstFix) {
             //先将项目拷贝到exportExamples
-//            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
+            dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
             sourceClassPath = ImportPath.examplesRootPath + "\\out\\production\\Patch";
         } else if (type == FixType.iterateFix) {
             dirPath = iterateDirPath;
@@ -120,7 +120,7 @@ public class Fix {
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
-
+//System.exit(-1);
         //检测修复完的程序是否正确
         fixMethods += "结果: ";
         if (Unicorn.verifyFixSuccessful(verifyClasspath)) {
