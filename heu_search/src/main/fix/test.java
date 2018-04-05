@@ -46,12 +46,7 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-        ReadWriteNode readWriteNode = new ReadWriteNode(2, "checkfield.InstanceExample@15f", "number", "WRITE", "123", "checkfield/CheckField.java:11");
-        ReadWriteNode readWriteNode1 = new ReadWriteNode(4, "checkfield.InstanceExample@15f", "number", "READ", "123", "checkfield/CheckField.java:13");
-        List<ReadWriteNode> rwl = new ArrayList<ReadWriteNode>();
-        rwl.add(readWriteNode);
-        rwl.add(readWriteNode1);
-        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java");
+        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/

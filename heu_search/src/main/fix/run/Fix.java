@@ -224,9 +224,9 @@ public class Fix {
                         }
                     }
                     //应该要加什么锁
-                    //这个步骤实际是用分析字符串来完成的
-                    //实际上是不对的
                     if (type == AddSyncType.localSync) {//需要添加局部锁
+                        //这个步骤实际是用分析字符串来完成的
+                        //实际上是不对的
                         lockName = acquireLockName(node);
                     } else if (type == AddSyncType.globalStaticSync) {//需要添加全局锁
                         if (!GlobalStaticObject.isDefineObject) {
@@ -275,7 +275,17 @@ public class Fix {
                         //然后检查是不是成员变量或构造函数
                         if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
                             //最后得到需要加什么锁
-                            lockName = acquireLockName(node);
+                            if(type == AddSyncType.localSync) {
+                                lockName = acquireLockName(node);
+                            } else if (type == AddSyncType.globalStaticSync) {
+                                if (!GlobalStaticObject.isDefineObject) {
+                                    lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
+                                    GlobalStaticObject.objectName = lockName;
+                                    GlobalStaticObject.isDefineObject = true;
+                                }else {
+                                    lockName = GlobalStaticObject.objectName;
+                                }
+                            }
                             //判断加锁会不会和for循环等交叉
                             UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                             firstLoc = lockLine.getFirstLoc();
@@ -321,6 +331,7 @@ public class Fix {
 
         //关联变量处理
 //        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//待定
+
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {
             fixMethods += "对" + rwnList.get(0) + "加锁起止位置" + firstLoc + "->" + lastLoc + '\n';
