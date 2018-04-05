@@ -11,7 +11,7 @@ public class ImportPath {
 //    public static String examplesRootPath = "C:\\Users\\lhr\\Desktop\\test\\Grail\\grail-soot24\\classes";
     //具体到某个项目的包名称
 //    public static String projectName = "account";
-    public static String projectName = "wronglock2";
+    public static String projectName = "consisitency";
     //这个项目的主类名称
     public static String mainClassName = "Main";
     //临时文件的目录，不用太在意，反正用完就删

@@ -2,6 +2,7 @@ package fix.analyzefile;
 
 import fix.entity.ImportPath;
 import fix.entity.lock.ExistLock;
+import fix.io.ExamplesIO;
 import org.eclipse.jdt.core.dom.*;
 import p_heu.entity.ReadWriteNode;
 
@@ -32,21 +33,24 @@ public class UseASTAnalysisClass {
 
     static ExistLock existLock = new ExistLock();//用来记录已有的sync块所在的行数，最后根据它获取锁的名称
 
+    private static String objectName;//加的静态变量的名称
+
     public static void main(String[] args) {
 //        System.out.println(isConstructOrIsMemberVariableOrReturn(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
         /*List<ReadWriteNode> nodesList = new ArrayList<ReadWriteNode>();
         nodesList.add(new ReadWriteNode(1, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:52"));
         nodesList.add(new ReadWriteNode(2, "linkedlist.MyListNode@18d", "_next", "WRITE", "Thread-4", "linkedlist/MyLinkedList.java:53"));
         System.out.println(assertSameFunction(nodesList, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));*/
-        ReadWriteNode readWriteNode = new ReadWriteNode(2, "checkfield.InstanceExample@15f", "number", "WRITE", "123", "checkfield/CheckField.java:11");
-        ReadWriteNode readWriteNode1 = new ReadWriteNode(4, "checkfield.InstanceExample@15f", "number", "READ", "123", "checkfield/CheckField.java:13");
+        /*ReadWriteNode readWriteNode = new ReadWriteNode(1, "consisitency.Main", "a", "WRITE", "Thread-2", "consisitency/Main.java:15");
+        ReadWriteNode readWriteNode1 = new ReadWriteNode(2, "consisitency.Main", "a", "WRITE", "Thread-3", "consisitency/Main.java:15");
         List<ReadWriteNode> rwl = new ArrayList<ReadWriteNode>();
         rwl.add(readWriteNode);
         rwl.add(readWriteNode1);
-        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java"));
+        System.out.println(assertSameFunction(rwl,ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java"));*/
 //        useASTCFindLockLine(readWriteNode, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java");
         /*useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
+        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -64,6 +68,28 @@ public class UseASTAnalysisClass {
     public static boolean isConstructOrIsMemberVariableOrReturn(int firstLoc, int lastLoc, String filePath) {
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
         return flagConstruct || flagMember;
+    }
+
+    //利用AST来添加全局静态变量，用于加全局锁
+    public static String useASTToaddStaticObject(String filePath) {
+
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(new ASTVisitor() {
+            @Override
+            public boolean visit(TypeDeclaration node) {
+                int index = cu.getLineNumber(node.getStartPosition()) + 1;
+                ExamplesIO examplesIO = ExamplesIO.getInstance();
+                objectName = "objectFix";
+                examplesIO.addStaticObject(index, objectName,filePath);
+                return super.visit(node);
+            }
+        });
+        return objectName;
     }
 
     //利用AST来寻找加锁的行数

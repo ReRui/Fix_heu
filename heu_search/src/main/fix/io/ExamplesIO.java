@@ -10,12 +10,17 @@ public class ExamplesIO {
     private ExamplesIO() {
     }
 
-    ;
-
     public static ExamplesIO getInstance() {
         return examplesIO;
     }
 
+    //添加静态变量
+    public void addStaticObject(int line, String objectName, String filePath){
+        String context = "static Object " + objectName + " = new Object();";
+        InsertCode.insert(line, context, filePath);
+    }
+
+    //对一个变量加锁
     public void addLockToOneVar(int startLine, int endLine, String lockName, String filePath) {
         InsertCode.insert(startLine, "synchronized (" + lockName + "){ ", filePath);
         InsertCode.insert(endLine, "}", filePath);

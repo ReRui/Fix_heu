@@ -65,7 +65,7 @@ public class Unicorn {
     }
 
     private static void useUnicorn(int type, String classpath) {
-//        Pattern.setPatternSet("unicorn");
+        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 

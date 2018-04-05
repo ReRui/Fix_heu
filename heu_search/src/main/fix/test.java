@@ -6,6 +6,7 @@ import fix.io.ExamplesIO;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 import org.eclipse.jdt.core.dom.*;
+import p_heu.entity.ReadWriteNode;
 import p_heu.entity.filter.Filter;
 import p_heu.listener.SequenceProduceListener;
 import p_heu.run.GenerateClass;
@@ -28,17 +29,6 @@ public class Test {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-      String s = " D:\\Patch\\exportExamples\\org.apache.log4j.TTCCLayout.java";
-
-      if(s.contains(".java")){
-          s = s.substring(0, s.length() - 5);
-          //处理包名有几层的情况
-          if(s.contains(".")) {
-              s = s.replaceAll("\\.","/");
-          }
-          s += ".java";
-      }
-      System.out.println(s);
 
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
@@ -56,7 +46,12 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-//        useASTChangeLine(50, 51, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MergeSort.java");
+        ReadWriteNode readWriteNode = new ReadWriteNode(2, "checkfield.InstanceExample@15f", "number", "WRITE", "123", "checkfield/CheckField.java:11");
+        ReadWriteNode readWriteNode1 = new ReadWriteNode(4, "checkfield.InstanceExample@15f", "number", "READ", "123", "checkfield/CheckField.java:13");
+        List<ReadWriteNode> rwl = new ArrayList<ReadWriteNode>();
+        rwl.add(readWriteNode);
+        rwl.add(readWriteNode1);
+        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
@@ -93,7 +88,7 @@ public class Test {
 
 
     //利用AST来改变加锁位置
-    public static void useASTChangeLine(int firstLoc, int lastLoc, String filePath) {
+    public static void useASTChangeLine(String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -106,17 +101,6 @@ public class Test {
 
         cu.accept(new ASTVisitor() {
 
-            @Override
-            public void endVisit(TypeDeclaration node) {
-                System.out.println(node);
-                super.endVisit(node);
-            }
-
-            @Override
-            public void endVisit(MethodDeclaration node) {
-                System.out.println(node);
-                super.endVisit(node);
-            }
 
             /*@Override
             public boolean visit(SimpleName node) {
@@ -124,6 +108,14 @@ public class Test {
                 return super.visit(node);
             }
 */
+
+            @Override
+            public boolean visit(TypeDeclaration node) {
+                System.out.println(node);
+                System.out.println(cu.getLineNumber(node.getStartPosition()));
+                return super.visit(node);
+            }
+
             @Override
             public boolean visit(InfixExpression node) {
                /* ASTNode parent = node.getParent();
