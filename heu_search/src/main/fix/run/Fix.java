@@ -1,6 +1,7 @@
 package fix.run;
 
 import fix.analyzefile.*;
+import fix.entity.GlobalStaticObject;
 import fix.entity.ImportPath;
 import fix.entity.lock.ExistLock;
 import fix.entity.type.AddSyncType;
@@ -33,16 +34,20 @@ public class Fix {
     static String addSyncFilePath = "";//加锁路径
 
     //用来计时
-    static long startTime = 0;
+    static long startUnicornTime = 0;
     static long endUnicornTime = 0;
-    static long endFixFirstTime = 0;
+    static long startFixTime = 0;
+    static long endFixTime = 0;
+
+    //全局静态变量
+    static GlobalStaticObject globalStaticObject = new GlobalStaticObject();
 
     public static void main(String[] args) {
-        startTime = System.currentTimeMillis();
+        startUnicornTime = System.currentTimeMillis();
         fix(FixType.firstFix);
 //        fix(FixType.iterateFix);
-        endFixFirstTime = System.currentTimeMillis();
-        System.out.println("修复需要的时间:" + (endFixFirstTime - startTime));
+        endFixTime = System.currentTimeMillis();
+        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
 
     }
 
@@ -73,6 +78,9 @@ public class Fix {
                 tempList.remove(i);
         }*/
 
+        endUnicornTime = System.currentTimeMillis();
+        System.out.println("得到pattern的时间:" + (endUnicornTime - startUnicornTime));
+
         //将所有的pattern打印出来，方便以后选择
         System.out.println(tempList);
 
@@ -82,6 +90,7 @@ public class Fix {
         int whichToUse = sc.nextInt();//使用第几个pattern
         //最下面那个是0，依次往上，因为当时排序的时候是倒着排的
 
+        startFixTime = System.currentTimeMillis();
         Unicorn.PatternCounter patternCounter = tempList.get(tempList.size() - 1 - whichToUse);
 
         //根据pattern知道需要在哪个类中加锁
@@ -91,8 +100,6 @@ public class Fix {
 
         addSyncFilePath = ImportPath.examplesRootPath + "/exportExamples/" + position.split(":")[0];
 
-        endUnicornTime = System.currentTimeMillis();
-        System.out.println("得到pattern的时间:" + (endUnicornTime - startTime));
         //将拿到的pattern写入文件中
         InsertCode.writeLogFile(patternCounter.toString(), "修复得到的pattern");
 
@@ -102,7 +109,6 @@ public class Fix {
 
         //将sequence写入文件中
         InsertCode.writeLogFile(patternCounter.getFirstFailAppearPlace().toString(), "修复得到的sequence");
-
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
@@ -183,13 +189,11 @@ public class Fix {
         }
 
         //根据获得的list，进行加锁
-        addSynchronized(threadA, AddSyncType.thisSync);
+        addSynchronized(threadA, AddSyncType.localSync);
         lockAdjust.setOneLockFinish(true);//表示第一次执行完
-        addSynchronized(threadB, AddSyncType.thisSync);
+        addSynchronized(threadB, AddSyncType.localSync);
         lockAdjust.adjust(addSyncFilePath);//合并锁
     }
-    static boolean isAddGlobalStaticObject = false;//是否已经添加了全局静态变量
-    static String temp = "";//lockName
 
     private static void addSynchronized(List<ReadWriteNode> rwnList, int type) {
         int firstLoc = 0, lastLoc = 0;
@@ -222,15 +226,15 @@ public class Fix {
                     //应该要加什么锁
                     //这个步骤实际是用分析字符串来完成的
                     //实际上是不对的
-                    if (type == AddSyncType.thisSync) {
+                    if (type == AddSyncType.localSync) {//需要添加局部锁
                         lockName = acquireLockName(node);
-                    } else if (type == AddSyncType.globalStaticSync) {
-                        if (!isAddGlobalStaticObject) {
+                    } else if (type == AddSyncType.globalStaticSync) {//需要添加全局锁
+                        if (!GlobalStaticObject.isDefineObject) {
                             lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
-                            temp = lockName;
-                            isAddGlobalStaticObject = true;
+                            GlobalStaticObject.objectName = lockName;
+                            GlobalStaticObject.isDefineObject = true;
                         }else {
-                            lockName = temp;
+                            lockName = GlobalStaticObject.objectName;
                         }
                     }
                     int poi = Integer.parseInt(node.getPosition().split(":")[1]);
@@ -357,7 +361,7 @@ public class Fix {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //如果是类的static变量，，直接加this锁？？
+        //如果是类的static变量，直接加this锁？？
         if (!node.getElement().contains("@")) {
             result = "this";
         }
@@ -385,10 +389,6 @@ public class Fix {
                 writeNode = patternCounter.getNodes()[i];
             }
         }
-
-        /*System.out.println("write" + writeNode);
-        System.out.println(!RecordSequence.isLast(readNode));
-        System.out.println(!RecordSequence.isFirst(writeNode));*/
 
         if (readNode != null && writeNode != null && (!RecordSequence.isLast(readNode) || !RecordSequence.isFirst(writeNode))) {
             fixMethods += "添加同步\n";
@@ -482,7 +482,6 @@ public class Fix {
         int flagAssertLocation = Integer.MIN_VALUE;//flag应该在那行判断
         for (int i = 0; i < 2; i++) {
             String position = patternCounter.getNodes()[i].getPosition();
-//            System.out.println(position);
             String[] positionArg = position.split(":");
             flagDefineLocation = Integer.parseInt(positionArg[1]) < flagDefineLocation ? Integer.parseInt(positionArg[1]) : flagDefineLocation;
             flagAssertLocation = Integer.parseInt(positionArg[1]) > flagAssertLocation ? Integer.parseInt(positionArg[1]) : flagAssertLocation;
@@ -497,7 +496,6 @@ public class Fix {
             //添加信号量的定义
             examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", addSyncFilePath);//待修订
 
-
             //添加信号量判断,
             //待定，只执行一句我就加了分号，这样是否可行？
             examplesIO.addVolatileIf(flagAssertLocation, addSyncFilePath);//待修订
@@ -505,6 +503,5 @@ public class Fix {
             //添加信号为true的那条语句，那条语句应该在定义的后一行
             examplesIO.addVolatileToTrue(flagDefineLocation + 1, addSyncFilePath);//待修订
         }
-
     }
 }
