@@ -42,7 +42,7 @@ public class ExamplesIO {
     public String copyFromOneDirToAnotherAndChangeFilePath(String dir, String targetDir, String dirPath) {
         String changeFilePath = "";
         File file = new File(dirPath);
-        File[] fileArr = file.listFiles();
+//        File[] fileArr = file.listFiles();
         //先创建一个copy目录
         changeFilePath = dirPath.replaceAll(dir, targetDir);
         File target = createDirectory(changeFilePath);

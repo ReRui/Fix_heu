@@ -28,13 +28,18 @@ public class Test {
         } catch (IOException e) {
             e.printStackTrace();
         }*/
-        //处理包名有几层的情况
-        if(dirPath.contains(".")) {
-            dirPath = dirPath.replaceAll("\\.","/");
-        }
-        ExamplesIO eio = ExamplesIO.getInstance();
-        dirPath = eio.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
-        System.out.println(dirPath);
+      String s = " D:\\Patch\\exportExamples\\org.apache.log4j.TTCCLayout.java";
+
+      if(s.contains(".java")){
+          s = s.substring(0, s.length() - 5);
+          //处理包名有几层的情况
+          if(s.contains(".")) {
+              s = s.replaceAll("\\.","/");
+          }
+          s += ".java";
+      }
+      System.out.println(s);
+
         /*for (int i = 0; i < 5; ++i) {
             String[] str = new String[]{
                     "+classpath=" + "D:\\Patch\\out\\production\\Patch",

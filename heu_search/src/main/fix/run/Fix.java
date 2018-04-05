@@ -46,7 +46,7 @@ public class Fix {
     }
 
     private static void fix(int type) {
-        String verifyClasspath = ImportPath.verifyPath + "\\generateClass";//要验证的class路径
+        String verifyClasspath = ImportPath.verifyPath + "/generateClass";//要验证的class路径
 
         //处理包名有几层的情况
         if(dirPath.contains(".")) {
@@ -56,10 +56,10 @@ public class Fix {
         if (type == FixType.firstFix) {
             //先将项目拷贝到exportExamples
             dirPath = examplesIO.copyFromOneDirToAnotherAndChangeFilePath("examples", "exportExamples", dirPath);
-            sourceClassPath = ImportPath.examplesRootPath + "\\out\\production\\Patch";
+            sourceClassPath = ImportPath.examplesRootPath + "/out/production/Patch";
         } else if (type == FixType.iterateFix) {
             dirPath = iterateDirPath;
-            sourceClassPath = ImportPath.verifyPath + "\\generateClass";
+            sourceClassPath = ImportPath.verifyPath + "/generateClass";
         }
 
         //拿到最后一个元素
@@ -211,7 +211,7 @@ public class Fix {
             //判断它们在不在一个函数中
 //            boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, dirPath + "\\" + whichCLassNeedSync);
             boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
-            System.out.println("判断在不在同一个函数" + flagSame);
+//            System.out.println("判断在不在同一个函数" + flagSame);
             if (flagSame) {//在一个函数中
                 //先找找原来有没有锁
                 boolean varHasLock = false;//记录当前pattern是否加锁

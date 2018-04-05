@@ -84,7 +84,14 @@ public class Unicorn {
 
         for (int i = 0; i < 50; ++i) {
             String[] str = new String[]{
-                    "+classpath=" + classpath,
+                    "+classpath=" + classpath + ";"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/javaee.jar;"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/jacontebe-1.0.jar;"
+                            + "D:/Patch/lib/additionalJAR/jdmkrt.jar;"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/coring-1.4.jar;"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/commons-collections-2.1.jar;"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/commons-pool-1.2.jar;"
+                            + "D:/Patch/lib/additionalJAR/lib/realLib/mockito-all-1.9.5.jar",
                     "+search.class=p_heu.search.SingleExecutionSearch",
                     ImportPath.projectName + "." + ImportPath.mainClassName
 //                    "benchmarks.dstest.MTSetTest"
