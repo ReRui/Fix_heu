@@ -23,7 +23,7 @@ public class LockPolicyPopularize {
             //对相关变量加锁
             //set中大于等于两个变量才有加锁的意义
             //不然加锁没意义
-            AddLockAfterAcquireVariable.lock(relevantVariabSet, lockName, filePath);
+            AddLockAfterAcquireVariable.lock(firstLoc, lastLoc, relevantVariabSet, lockName, filePath);
         }
     }
 

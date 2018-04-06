@@ -331,7 +331,7 @@ public class Fix {
         }
 
         //关联变量处理
-//        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//待定
+        LockPolicyPopularize.fixRelevantVar(firstLoc, lastLoc, rwnList.get(0).getThread(), whichCLassNeedSync, lockName, addSyncFilePath);//待定
 
         //表示能加锁
         if (firstLoc > 0 && lastLoc > 0) {

@@ -62,7 +62,7 @@ public class AddLockAfterAcquireVariable {
     }
 
     //    public static void lock(String filePath) {//原来的删除了
-    public static void lock(Set<String> relevantVariabSet, String lockName, String filePath) {
+    public static void lock(int firstLoc, int lastLoc, Set<String> relevantVariabSet, String lockName, String filePath) {
         //得到关联变量
         for (String s : relevantVariabSet)
             variableSet.add(s);
@@ -98,9 +98,13 @@ public class AddLockAfterAcquireVariable {
                 if (this.names.contains(node.getIdentifier())) {
 //                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
                     boolean flag = false;
-                    for (String s : variableSet) {
-                        if (s.equals(node.getIdentifier()))
-                            flag = true;
+                    int nodeStart = cu.getLineNumber(node.getStartPosition());
+                    int nodeEnd = cu.getLineNumber(node.getStartPosition() + node.getLength());
+                    if(!(nodeStart >= firstLoc && nodeStart <= lastLoc)){
+                        for (String s : variableSet) {
+                            if (s.equals(node.getIdentifier()))
+                                flag = true;
+                        }
                     }
                     if (flag) {
                         if (matchVariable.matchSetIsEmpty()) {
