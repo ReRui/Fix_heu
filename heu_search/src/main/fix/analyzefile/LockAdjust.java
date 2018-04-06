@@ -114,7 +114,8 @@ public class LockAdjust {
     }
 
     public void adjust(String filePath) {
-        if (oneLockName.equals(twoLockName)) { //两次加锁相同
+        //后来我仔细想了想，不相同也应该合并。
+//        if (oneLockName.equals(twoLockName)) { //两次加锁相同
             if (cross()) {//如果交叉需要合并
                 if (lastEqualFirst()) {//判断某次加锁终止行是不是和另一次加锁起始行相等
                     adjustOldSync(filePath, 1);//修改原有的锁
@@ -125,7 +126,7 @@ public class LockAdjust {
                     adjustOldSync(filePath, 0);//0表示合并锁，1表示移动锁
                 }
             }
-        }
+//        }
     }
 
     //删除原有锁

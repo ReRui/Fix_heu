@@ -7,13 +7,16 @@ import gov.nasa.jpf.JPF;
 
 public class CheckWhetherLocked {
 
+    static boolean flagUseJPFCheckWhetherLock = false;//用jpf检测是否被加锁
+    static boolean flagUseASTCheckWhetherLock = false;//用jpf检测是否被加锁
 
-    //要寻找的变量的位置,形式必须是   包名/java文件：行数
+    //要寻找的变量的位置,形式必须是   包名/java文件：行数1
     //"account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("account/Account.java:24","amount", ImportPath.verifyPath + "\\generateClass"));
+        System.out.println(check("linkedlist/MyLinkedList.java:44","_next", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\linkedlist\\MyLinkedList.java"));
+        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
-    public static boolean check(String variableLoc, String variableName, String classpath) {
+    public static boolean check(String variableLoc, String variableName, String classpath, String javaFilePath) {
         String[] str = new String[]{
 //                "+classpath=" + ImportPath.examplesRootPath + "\\out\\production\\Patch",
                 "+classpath=" + classpath,
@@ -28,7 +31,18 @@ public class CheckWhetherLocked {
 //        jpf.addListener(lockListener);
         jpf.run();
 //        System.out.println(checkWhetherLockedListener.isCheckFlag());
-        return checkWhetherLockedListener.isCheckFlag();
+        flagUseJPFCheckWhetherLock = checkWhetherLockedListener.isCheckFlag();
+        int varLine = Integer.parseInt(variableLoc.split(":")[1]);
+        flagUseASTCheckWhetherLock = UseASTAnalysisClass.useASTCheckWhetherLock(varLine,javaFilePath);
+        //一个需要对clas文件处理
+        //一个对java文件处理
+        //因为jpf分析不出来synchronized (this) {
+        //                tmp = new MyListNode(x, p._current._next);
+        //            }
+        //AST分析不出来synchronized 方法
+        //所以两种方法结合
+
+        return flagUseJPFCheckWhetherLock || flagUseASTCheckWhetherLock;
     }
 
 }

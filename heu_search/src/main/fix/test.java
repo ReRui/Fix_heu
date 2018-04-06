@@ -46,7 +46,7 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\CheckField.java");
+        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
@@ -95,34 +95,9 @@ public class Test {
         final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
         cu.accept(new ASTVisitor() {
-
-
-            /*@Override
-            public boolean visit(SimpleName node) {
-                System.out.println(node + "," + cu.getLineNumber(node.getStartPosition()));
-                return super.visit(node);
-            }
-*/
-
             @Override
-            public boolean visit(TypeDeclaration node) {
+            public boolean visit(SynchronizedStatement node) {
                 System.out.println(node);
-                System.out.println(cu.getLineNumber(node.getStartPosition()));
-                return super.visit(node);
-            }
-
-            @Override
-            public boolean visit(InfixExpression node) {
-               /* ASTNode parent = node.getParent();
-                int start = cu.getLineNumber(parent.getStartPosition());
-                int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
-                System.out.println(start);
-                System.out.println(end);
-                System.out.println(parent);
-                if (firstLoc >= start && lastLoc <= end) {//加锁区域在括号的里面
-                    System.out.println("yes");
-                }*/
-
                 return super.visit(node);
             }
         });

@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +34,13 @@ public class UseASTAnalysisClass {
 
     private static String objectName;//加的静态变量的名称
 
+    static boolean flagUseASTCheckWhetherLock = false;
+
+    //防止上一次的true结果，影响到下一次
+    public static void setFlagUseASTCheckWhetherLock(boolean flagUseASTCheckWhetherLock) {
+        UseASTAnalysisClass.flagUseASTCheckWhetherLock = flagUseASTCheckWhetherLock;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(isConstructOrIsMemberVariableOrReturn(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
         /*List<ReadWriteNode> nodesList = new ArrayList<ReadWriteNode>();
@@ -50,7 +56,8 @@ public class UseASTAnalysisClass {
 //        useASTCFindLockLine(readWriteNode, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java");
         /*useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
-        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
+//        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
+        System.out.println(useASTCheckWhetherLock(42,ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -68,6 +75,31 @@ public class UseASTAnalysisClass {
     public static boolean isConstructOrIsMemberVariableOrReturn(int firstLoc, int lastLoc, String filePath) {
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
         return flagConstruct || flagMember;
+    }
+
+    //利用AST来添加全局静态变量，用于加全局锁
+    public static boolean useASTCheckWhetherLock(int varLoc, String filePath) {
+
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(new ASTVisitor() {
+            @Override
+            public boolean visit(SynchronizedStatement node) {
+
+                int start = cu.getLineNumber(node.getStartPosition());
+                int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
+
+                if(varLoc >= start && varLoc <= end){
+                    flagUseASTCheckWhetherLock = true;
+                }
+                return super.visit(node);
+            }
+        });
+        return flagUseASTCheckWhetherLock;
     }
 
     //利用AST来添加全局静态变量，用于加全局锁

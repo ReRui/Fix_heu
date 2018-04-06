@@ -205,7 +205,6 @@ public class Fix {
             //如果有两个变量，需要分析
             //判断它们在不在一个函数中
             boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
-//            System.out.println("判断在不在同一个函数" + flagSame);
             if (flagSame) {//在一个函数中
                 //先找找原来有没有锁
                 boolean varHasLock = false;//记录当前pattern是否加锁
@@ -214,12 +213,13 @@ public class Fix {
                 //对A的list分析
                 for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
-                    if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {//检查是否存在锁
+                    if (CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, addSyncFilePath)) {//检查是否存在锁
                         if (i == 1 && varHasLock == true) {//表示两个都有锁
                             return;//直接结束
                         } else {
                             varHasLock = true;//有锁标为true
                             existLock = existLockName(rwnList.get(i));
+                            UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);//防止上一次的true结果，影响到下一次
 //                            existLock = null;
                         }
                     }
@@ -233,7 +233,7 @@ public class Fix {
                             lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
                             GlobalStaticObject.objectName = lockName;
                             GlobalStaticObject.isDefineObject = true;
-                        }else {
+                        } else {
                             lockName = GlobalStaticObject.objectName;
                         }
                     }
@@ -249,6 +249,7 @@ public class Fix {
                         }
                     }
                 }
+
                 //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
                 if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
 
@@ -262,7 +263,7 @@ public class Fix {
                         //加锁
                         examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
                     } else {//有加锁的，直接修改原有锁
-                        UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc, existLock.getStartLine(), existLock.getEndLine(), addSyncFilePath);
+                        UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc + 1, existLock.getStartLine(), existLock.getEndLine(), addSyncFilePath);
                     }
                 }
             } else {//不在一个函数中
@@ -271,18 +272,18 @@ public class Fix {
                     firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
                     lastLoc = firstLoc;
                     //每个都检查是不是加锁
-                    if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {
+                    if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, addSyncFilePath)) {
                         //然后检查是不是成员变量或构造函数
                         if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
                             //最后得到需要加什么锁
-                            if(type == AddSyncType.localSync) {
+                            if (type == AddSyncType.localSync) {
                                 lockName = acquireLockName(node);
                             } else if (type == AddSyncType.globalStaticSync) {
                                 if (!GlobalStaticObject.isDefineObject) {
                                     lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
                                     GlobalStaticObject.objectName = lockName;
                                     GlobalStaticObject.isDefineObject = true;
-                                }else {
+                                } else {
                                     lockName = GlobalStaticObject.objectName;
                                 }
                             }
@@ -300,7 +301,7 @@ public class Fix {
         } else {
             //对于一个变量，检查它是否已经被加锁
             ReadWriteNode node = rwnList.get(0);
-            if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath)) {
+            if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, addSyncFilePath)) {
                 //没被加锁，获得需要加锁的行数
                 firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
                 lastLoc = firstLoc;
@@ -433,7 +434,7 @@ public class Fix {
             if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, addSyncFilePath)) {
                 //加锁
                 //检查是否存在锁再加锁
-                if (!CheckWhetherLocked.check(patternCounter.getNodes()[0].getPosition(), patternCounter.getNodes()[0].getField(), sourceClassPath)) {
+                if (!CheckWhetherLocked.check(patternCounter.getNodes()[0].getPosition(), patternCounter.getNodes()[0].getField(), sourceClassPath, addSyncFilePath)) {
                     //判断加锁会不会和for循环等交叉
                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
                     firstLoc = lockLine.getFirstLoc();
@@ -460,7 +461,7 @@ public class Fix {
             if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, addSyncFilePath)) {
                 //加锁
                 //检查是否存在锁再加锁
-                if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath)) {
+                if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath, addSyncFilePath)) {
                     fixMethods += "加锁位置" + Integer.parseInt(positionArg[1]) + '\n';
                     //判断一下能不能用当前的锁直接进行修复
 
