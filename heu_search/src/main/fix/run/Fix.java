@@ -46,8 +46,8 @@ public class Fix {
         startUnicornTime = System.currentTimeMillis();
         fix(FixType.firstFix);
 //        fix(FixType.iterateFix);
-        endFixTime = System.currentTimeMillis();
-        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
+        /*endFixTime = System.currentTimeMillis();
+        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));*/
 
     }
 
@@ -112,6 +112,10 @@ public class Fix {
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
+
+        endFixTime = System.currentTimeMillis();
+        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
+        System.exit(-1);
 
         //检测修复完的程序是否正确
         fixMethods += "结果: ";
