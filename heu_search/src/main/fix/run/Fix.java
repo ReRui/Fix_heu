@@ -46,8 +46,8 @@ public class Fix {
         startUnicornTime = System.currentTimeMillis();
         fix(FixType.firstFix);
 //        fix(FixType.iterateFix);
-        /*endFixTime = System.currentTimeMillis();
-        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));*/
+        endFixTime = System.currentTimeMillis();
+        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
 
     }
 
@@ -112,10 +112,6 @@ public class Fix {
 
         //对拷贝的项目进行修复
         divideByLength(patternCounter);
-
-        endFixTime = System.currentTimeMillis();
-        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
-        System.exit(-1);
 
         //检测修复完的程序是否正确
         fixMethods += "结果: ";
@@ -271,7 +267,9 @@ public class Fix {
                     }
                 }
             } else {//不在一个函数中
-                for (int i = 0; i < rwnList.size(); i++) {
+                //先保留这一段
+
+/*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
                     firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
                     lastLoc = firstLoc;
@@ -300,7 +298,7 @@ public class Fix {
                             examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
                         }
                     }
-                }
+                }*/
             }
         } else {
             //对于一个变量，检查它是否已经被加锁

@@ -45,11 +45,6 @@ public class CallGraphBuild {
 
         while (extend(visited1)) ;
 
-        System.out.println("-----------------visited1------------------");
-        for (MethodCallRow callRow : visited1) {
-            System.out.println(callRow);
-        }
-
         Set<CommonCaller> result = new HashSet<>();
         CommonCaller caller = sameMethod(visited1, callRowRight);
         if (caller != null) {
