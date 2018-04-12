@@ -38,7 +38,7 @@ public class Unicorn {
 
 //        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
         System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
-//        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\test\\Grail\\grail-cache4j\\bin"));
+//        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\test\\Grail\\grail-tomcat-6.0.x\\bin"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
@@ -69,7 +69,7 @@ public class Unicorn {
     }
 
     private static void useUnicorn(int type, String classpath) {
-//        Pattern.setPatternSet("unicorn");
+        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 

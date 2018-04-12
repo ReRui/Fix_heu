@@ -11,6 +11,7 @@ import fix.io.InsertCode;
 import p_heu.entity.ReadWriteNode;
 import p_heu.entity.pattern.Pattern;
 import p_heu.run.Unicorn;
+import soot.UseSoot;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -41,6 +42,9 @@ public class Fix {
 
     //全局静态变量
     static GlobalStaticObject globalStaticObject = new GlobalStaticObject();
+
+    //用于跨类修复
+    static UseSoot useSoot = UseSoot.getInstance();
 
     public static void main(String[] args) {
         startUnicornTime = System.currentTimeMillis();
@@ -268,7 +272,8 @@ public class Fix {
                 }
             } else {//不在一个函数中
                 //先保留这一段
-
+                useSoot.getCallGraph(rwnList.get(0),rwnList.get(1));
+                examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "this", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
 /*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
                     firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);

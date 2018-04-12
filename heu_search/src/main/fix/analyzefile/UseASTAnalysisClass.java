@@ -261,7 +261,7 @@ public class UseASTAnalysisClass {
         }
     }
 
-    //chanage file content to buffer array
+    //将文件处理成buffer array
     public static char[] getFileContents(File file) {
         // char array to store the file contents in
         char[] contents = null;
@@ -270,7 +270,7 @@ public class UseASTAnalysisClass {
             StringBuffer sb = new StringBuffer();
             String line = "";
             while ((line = br.readLine()) != null) {
-                // append the content and the lost new line.
+                // 附加内容和丢失的新行。
                 sb.append(line + "\n");
             }
             contents = new char[sb.length()];

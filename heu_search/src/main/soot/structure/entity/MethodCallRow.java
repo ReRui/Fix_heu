@@ -1,4 +1,8 @@
 package soot.structure.entity;
+
+import java.util.HashSet;
+import java.util.Set;
+
 /*
 函数的调用者和调用发生的行
  */
@@ -8,10 +12,23 @@ public class MethodCallRow{
     private int row;
     private boolean extend;
 
-    public MethodCallRow(Method method, int row) {
+    private static Set<MethodCallRow> callRows = new HashSet<>();
+
+    private MethodCallRow(Method method, int row) {
         this.method = method;
         this.row = row;
         this.extend = false;
+    }
+
+    public static MethodCallRow getInstance(Method method, int row) {
+        for (MethodCallRow callRow : callRows) {
+            if (callRow.getMethod().equals(method) && callRow.getRow() == row) {
+                return callRow;
+            }
+        }
+        MethodCallRow instance = new MethodCallRow(method, row);
+        callRows.add(instance);
+        return instance;
     }
 
     public Method getMethod() {

@@ -37,8 +37,10 @@ public class UseSoot {
     }
 
     public static void main(String[] args) {
-        ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
-        ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");
+        /*ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
+        ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");*/
+        ReadWriteNode rw1 = new ReadWriteNode(1, "accountsubtype.PersonalAccount@1d8", "amount", "WRITE", "main", "accountsubtype/Account.java:27");
+        ReadWriteNode rw2 = new ReadWriteNode(2, "accountsubtype.PersonalAccount@1d8", "amount", "READ", "Thread-1", "accountsubtype/BusinessAccount.java:10");
         UseSoot useSoot = UseSoot.getInstance();
         useSoot.getCallGraph(rw1, rw2);
         System.out.println(useSoot.getMinLine());
@@ -58,6 +60,8 @@ public class UseSoot {
         //利用soot得到调用图
         Set<CommonCaller> callGraphInfo = Main.getCallGraphInfo(classNameOne, classLineOne, classNameTwo, classLineTwo);
 
+        System.out.println(callGraphInfo +  "================>");
+        System.exit(-1);
         for (CommonCaller caller : callGraphInfo) {
             syncJava = caller.getMethod().getClassName();
             int tempMin = Math.min(caller.getLeftRow(),caller.getRightRow());

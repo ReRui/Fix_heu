@@ -26,7 +26,7 @@ public class CallGraphBuild {
         for (String key : CallGraphGetter.callsites.keySet()) {
             List<CallSite> callSites = CallGraphGetter.callsites.get(key);
             for (CallSite callSite : callSites) {
-                callers.add(new MethodCallRow(
+                callers.add(MethodCallRow.getInstance(
                         new Method(callSite.getClassName(), callSite.getSignature()),
                         callSite.getLine()
                 ));
@@ -39,8 +39,8 @@ public class CallGraphBuild {
         Set<MethodCallRow> visited1 = new HashSet<>();
         Set<MethodCallRow> visited2 = new HashSet<>();
 
-        visited1.add(new MethodCallRow(method1, row1));
-        MethodCallRow callRowRight = new MethodCallRow(method2, row2);
+        visited1.add(MethodCallRow.getInstance(method1, row1));
+        MethodCallRow callRowRight = MethodCallRow.getInstance(method2, row2);
         visited2.add(callRowRight);
 
         while (extend(visited1)) ;
