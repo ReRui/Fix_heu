@@ -86,7 +86,7 @@ public class Unicorn {
             GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
         }
 
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 100; ++i) {
             String[] str = new String[]{
                     "+classpath=" + classpath + ";"
                             + "D:/Patch/lib/additionalJAR/lib/realLib/javaee.jar;"

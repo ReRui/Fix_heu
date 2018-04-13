@@ -39,8 +39,8 @@ public class UseSoot {
     public static void main(String[] args) {
         /*ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
         ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");*/
-        ReadWriteNode rw1 = new ReadWriteNode(1, "accountsubtype.PersonalAccount@1d8", "amount", "WRITE", "main", "accountsubtype/Account.java:27");
-        ReadWriteNode rw2 = new ReadWriteNode(2, "accountsubtype.PersonalAccount@1d8", "amount", "READ", "Thread-1", "accountsubtype/BusinessAccount.java:10");
+        ReadWriteNode rw1 = new ReadWriteNode(1, "manager.Manager", "flag", "WRITE", "main", "manager/Trelease.java:19");
+        ReadWriteNode rw2 = new ReadWriteNode(2, "manager.Manager", "flag", "READ", "Thread-1", "manager/Manager.java:11");
         UseSoot useSoot = UseSoot.getInstance();
         useSoot.getCallGraph(rw1, rw2);
         System.out.println(useSoot.getMinLine());
