@@ -6,10 +6,7 @@ import fix.io.ExamplesIO;
 import org.eclipse.jdt.core.dom.*;
 import p_heu.entity.ReadWriteNode;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +54,7 @@ public class UseASTAnalysisClass {
         /*useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
 //        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
-        System.out.println(useASTCheckWhetherLock(42,ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
+        System.out.println(useASTCheckWhetherLock(42, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -93,7 +90,7 @@ public class UseASTAnalysisClass {
                 int start = cu.getLineNumber(node.getStartPosition());
                 int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
 
-                if(varLoc >= start && varLoc <= end){
+                if (varLoc >= start && varLoc <= end) {
                     flagUseASTCheckWhetherLock = true;
                 }
                 return super.visit(node);
@@ -104,8 +101,33 @@ public class UseASTAnalysisClass {
 
     //利用AST来添加全局静态变量，用于加全局锁
     public static String useASTToaddStaticObject(String filePath) {
+        //读取文件
+        //因为会出现在类前面有一大堆注释的情况
+        //ast计算行数的时候会从注释开始算
+        BufferedReader br = null;
+        String read = "";
+        int index = 1;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "GBK"));
+            while (((read = br.readLine()) != null)) {
+                if(read.contains("class")) {
+                    break;
+                } else {
+                    index++;
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ExamplesIO examplesIO = ExamplesIO.getInstance();
+        objectName = "objectFix";
+        examplesIO.addStaticObject(index +1, objectName, filePath);
 
-        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        /*ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
 
@@ -114,13 +136,17 @@ public class UseASTAnalysisClass {
         cu.accept(new ASTVisitor() {
             @Override
             public boolean visit(TypeDeclaration node) {
+
                 int index = cu.getLineNumber(node.getStartPosition()) + 1;
+
+
+
                 ExamplesIO examplesIO = ExamplesIO.getInstance();
                 objectName = "objectFix";
-                examplesIO.addStaticObject(index, objectName,filePath);
+                examplesIO.addStaticObject(index, objectName, filePath);
                 return super.visit(node);
             }
-        });
+        });*/
         return objectName;
     }
 
@@ -172,6 +198,17 @@ public class UseASTAnalysisClass {
                 int start = cu.getLineNumber(parent.getStartPosition());
                 int end = cu.getLineNumber(parent.getStartPosition() + parent.getLength());
                 if ((firstLoc <= start && (lastLoc + 1) <= end && (lastLoc + 1) > start) || (firstLoc > start && firstLoc <= end && (lastLoc + 1) > end)) {//加锁区域与代码块交叉的里面
+                    lockLine.setFirstLoc(Math.min(firstLoc, start));
+                    lockLine.setLastLoc(Math.max(lastLoc, end));//此处lastloc不要加1，因为加锁的时候已经是+1了
+                }
+                return super.visit(node);
+            }
+
+            @Override
+            public boolean visit(SwitchStatement node) {
+                int start = cu.getLineNumber(node.getStartPosition());
+                int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
+                if ((firstLoc >= start && firstLoc <= end) || (((lastLoc + 1) >= start && (lastLoc + 1) <= end))) {//此处与if语句等情况稍微有一些不同
                     lockLine.setFirstLoc(Math.min(firstLoc, start));
                     lockLine.setLastLoc(Math.max(lastLoc, end));//此处lastloc不要加1，因为加锁的时候已经是+1了
                 }

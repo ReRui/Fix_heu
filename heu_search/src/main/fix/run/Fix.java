@@ -165,7 +165,6 @@ public class Fix {
             }
         }
 
-//        System.exit(-1);
         addSynchronized(threadA, AddSyncType.globalStaticSync);
         lockAdjust.setOneLockFinish(true);//表示第一次执行完
         addSynchronized(threadB, AddSyncType.globalStaticSync);
@@ -272,8 +271,16 @@ public class Fix {
                 }
             } else {//不在一个函数中
                 //跨类搜索
-                useSoot.getCallGraph(rwnList.get(0),rwnList.get(1));
-                examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "this", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                useSoot.getCallGraph(rwnList.get(0), rwnList.get(1));
+                //如果pattern来自同一个类，那么跨类之后加的是this锁
+                String classNameOne = rwnList.get(0).getPosition().split("\\.")[0].replaceAll("/", ".");
+                String classNameTwo = rwnList.get(1).getPosition().split("\\.")[0].replaceAll("/", ".");
+                if (classNameOne.equals(classNameTwo)) {
+                    examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "this", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                } else {
+                    examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+
+                }
                 //先保留这一段
 /*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
@@ -402,7 +409,32 @@ public class Fix {
     private static void fixPatternOneToThree(Pattern patternCounter) {
         ReadWriteNode readNode = null;
         ReadWriteNode writeNode = null;
-        for (int i = 0; i < 2; i++) {
+
+        //如果pattern来自同一个类，那么跨类之后加的是this锁
+        String classNameOne = patternCounter.getNodes()[0].getPosition().split("\\.")[0].replaceAll("/", ".");
+        String classNameTwo = patternCounter.getNodes()[1].getPosition().split("\\.")[0].replaceAll("/", ".");
+//        if (!classNameOne.equals(classNameTwo)) {
+
+        /*System.out.println(patternCounter.getNodes()[0] + "=========>" + patternCounter.getNodes()[1]);
+        System.exit(-1);*/
+
+        //跨类搜索
+            useSoot.getCallGraph(patternCounter.getNodes()[1], patternCounter.getNodes()[0]);
+
+            UseASTAnalysisClass.useASTToaddStaticObject(ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+
+            int firstLoc = useSoot.getMinLine(),lastLoc = useSoot.getMaxLine();
+            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+            firstLoc = lockLine.getFirstLoc();
+            lastLoc = lockLine.getLastLoc();
+            /*System.out.println(firstLoc + "=>" + lastLoc);
+            System.exit(-1);*/
+            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "objectFix", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+            return;
+//        }
+
+        //先删除，等会再回复
+        /*for (int i = 0; i < 2; i++) {
             if (patternCounter.getNodes()[i].getType().equals("READ")) {
                 readNode = patternCounter.getNodes()[i];
             } else if (patternCounter.getNodes()[i].getType().equals("WRITE")) {
@@ -418,7 +450,7 @@ public class Fix {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
             addSignal(patternCounter);
-        }
+        }*/
     }
 
 
