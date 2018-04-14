@@ -12,9 +12,9 @@ public class ImportPath {
 
     //具体到某个项目的包名称
 //    public static String projectName = "account";
-    public static String projectName = "stringbuffer";
+    public static String projectName = "buggyprogram";
     //这个项目的主类名称
-    public static String mainClassName = "StringBufferTest";
+    public static String mainClassName = "BuggyProgram";
     //临时文件的目录，不用太在意，反正用完就删，但是要保证路径是对的
     public static String tempFile = "D:/Patch/temp.java";
     //验证程序的路径

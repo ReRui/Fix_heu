@@ -51,11 +51,11 @@ public class CallGraphBuild {
             result.add(caller);
         }
         Set<CommonCaller> resultPart = extend(visited1, visited2);
+
         while (resultPart != null) {
             result.addAll(resultPart);
             resultPart = extend(visited1, visited2);
         }
-
         return result;
     }
 
@@ -95,6 +95,9 @@ public class CallGraphBuild {
                 CommonCaller caller = sameMethod(visited1, newCaller);
                 if (caller != null) {
                     result.add(caller);
+                }
+                else {
+                    visited2.add(newCaller);
                 }
             }
         }
