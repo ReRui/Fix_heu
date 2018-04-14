@@ -1,21 +1,13 @@
 package fix;
 
-import fix.analyzefile.UseASTAnalysisClass;
 import fix.entity.ImportPath;
-import fix.io.ExamplesIO;
-import gov.nasa.jpf.Config;
-import gov.nasa.jpf.JPF;
 import org.eclipse.jdt.core.dom.*;
-import p_heu.entity.ReadWriteNode;
-import p_heu.entity.filter.Filter;
-import p_heu.listener.SequenceProduceListener;
-import p_heu.run.GenerateClass;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Matcher;
 
 public class Test {
     static  int tettt = 0;
@@ -46,27 +38,10 @@ public class Test {
             jpf.addListener(listener);
             jpf.run();
         }*/
-        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java");
+//        useASTChangeLine(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java");
         /*UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(48, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc());
         System.out.println(lockLine.getLastLoc());*/
-
-        String result = "";
-        String read = "            if ( a2.turn2 != 0)";
-//        java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?\\W?((\\w+\\.)?" + "turn2" + ").*$");
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile("^.*?((\\w+\\.)?" + "turn2" + ").*$");
-        Matcher m = p.matcher(read);
-        if (m.matches()) {
-            result = m.group(1);
-            int indexTemp = result.indexOf('.');
-            if (indexTemp == -1)
-                result = "this";
-            else
-                result = result.substring(0, indexTemp);
-        } else {
-            result = "this";
-        }
-        System.out.println(result);
     }
 
 

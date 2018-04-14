@@ -271,9 +271,10 @@ public class Fix {
                     }
                 }
             } else {//不在一个函数中
-                //先保留这一段
+                //跨类搜索
                 useSoot.getCallGraph(rwnList.get(0),rwnList.get(1));
                 examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "this", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                //先保留这一段
 /*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
                     firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
