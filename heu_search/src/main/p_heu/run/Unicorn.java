@@ -12,10 +12,8 @@ import p_heu.entity.pattern.Pattern;
 import p_heu.entity.sequence.Sequence;
 import p_heu.listener.SequenceProduceListener;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
 public class Unicorn {
 
@@ -82,7 +80,12 @@ public class Unicorn {
             //先将生成补丁后的程序编译成class文件
             //因为jpf文件要对class文件处理
             //源路径，目标路径
-            GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
+//            GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
+            Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
+            Set<String> jars = new HashSet<String>();
+            GenerateClass.compile(jars.toArray(new String[jars.size()]),
+                    files.toArray(new String[files.size()]),
+                    ImportPath.verifyPath + "\\generateClass");
         }
 
         for (int i = 0; i < 100; ++i) {
