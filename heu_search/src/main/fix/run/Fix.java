@@ -408,15 +408,15 @@ public class Fix {
     private static void fixPatternOneToThree(Pattern patternCounter) {
 
 
-       /* if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
+        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
             addSignal(patternCounter);
-        } else {*/
+        } else {
             //为长度为2的pattern添加同步
             fixMethods += "添加同步\n";
             addSyncPatternOneToThree(patternCounter);
-//        }
+        }
     }
 
 
@@ -471,7 +471,7 @@ public class Fix {
 
         }
 
-        //先注释，先改完soot
+        //原是不考虑soot的，现在我已经引入soot来修复
 /*        for (int i = 0; i < 2; i++) {
             String position = patternCounter.getNodes()[i].getPosition();
             String[] positionArg = position.split(":");
