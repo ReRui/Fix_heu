@@ -11,6 +11,7 @@ import p_heu.entity.filter.Filter;
 import p_heu.entity.pattern.Pattern;
 import p_heu.entity.sequence.Sequence;
 import p_heu.listener.SequenceProduceListener;
+import verify.run.FixVerification;
 
 import java.io.File;
 import java.util.*;
@@ -35,9 +36,9 @@ public class Unicorn {
         System.out.println(System.getProperty("projectName"));*/
 
 //        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
 //        System.out.println(Unicorn.getPatternCounterList(ImportPath.verifyPath + "\\generat   eClass"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -59,9 +60,11 @@ public class Unicorn {
 
     //获取验证结果
     public static boolean verifyFixSuccessful(String classpath) {
-        useUnicorn(UnicornType.verify, classpath);
+        /*useUnicorn(UnicornType.verify, classpath);
         //将拿到的pattern写入文件中
         InsertCode.writeToFile(patternCountersList.toString(), ImportPath.examplesRootPath + "\\logFile\\" + ImportPath.projectName + "\\verify pattern.txt");
+        */
+//        System.out.println(FixVerification.verify());
         return verifyFlag;
     }
 
@@ -100,7 +103,6 @@ public class Unicorn {
                             + "D:/Patch/lib/additionalJAR/lib/realLib/mockito-all-1.9.5.jar",
                     "+search.class=p_heu.search.SingleExecutionSearch",
                     ImportPath.projectName + "." + ImportPath.mainClassName
-//                    "benchmarks.dstest.MTSetTest"
             };
             Config config = new Config(str);
             JPF jpf = new JPF(config);

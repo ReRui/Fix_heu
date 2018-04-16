@@ -57,8 +57,8 @@ public abstract class DistanceBasedSearch extends Search {
             for (SearchListener listener : listeners) {
                 if (listener instanceof BasicPatternFindingListener) {
                     BasicPatternFindingListener bpfl = (BasicPatternFindingListener)listener;
-                    if (bpfl.getMod().equals(BasicPatternFindingListener.MOD.VERIFY) && count > 50) {
-                        System.out.println("---------------------------------------50 search finished---------------------------------");
+                    if (bpfl.getMod().equals(BasicPatternFindingListener.MOD.VERIFY) && correctSeqs.size() > 200) {
+                        System.out.println("---------------------------------------200 search finished---------------------------------");
                         break outer;
                     }
                 }
@@ -70,7 +70,6 @@ public abstract class DistanceBasedSearch extends Search {
                 sequence.setFinished(true);
                 addCorrectSeqs(sequence);
                 vm.restoreState(init_state);
-                System.out.println("init state");
                 vm.resetNextCG();
                 //当前序列置为空
                 sequence = null;
@@ -130,7 +129,6 @@ public abstract class DistanceBasedSearch extends Search {
                 sequence.setFinished(true);
                 addCorrectSeqs(sequence);
                 vm.restoreState(init_state);
-                System.out.println("init state");
                 vm.resetNextCG();
                 //当前序列置为空
                 sequence = null;
