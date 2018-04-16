@@ -1,13 +1,10 @@
 package p_heu.run;
 
 import fix.entity.ImportPath;
-import fix.entity.type.UnicornType;
-import fix.io.InsertCode;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 import p_heu.entity.Node;
 import p_heu.entity.ReadWriteNode;
-import p_heu.entity.filter.Filter;
 import p_heu.entity.pattern.Pattern;
 import p_heu.entity.sequence.Sequence;
 import p_heu.listener.SequenceProduceListener;
@@ -22,8 +19,6 @@ public class Unicorn {
     //修复所依赖的pattern
     static List<PatternCounter> patternCountersList = new ArrayList<>();
 
-    //验证修复结果
-    static boolean verifyFlag = true;
 
     //测试用的main函数
     public static void main(String[] args) {
@@ -54,7 +49,7 @@ public class Unicorn {
 
     //获取pattern
     public static List<PatternCounter> getPatternCounterList(String classpath) {
-        useUnicorn(UnicornType.getPattern, classpath);
+        useUnicorn(classpath);
         return patternCountersList;
     }
 
@@ -65,31 +60,22 @@ public class Unicorn {
         InsertCode.writeToFile(patternCountersList.toString(), ImportPath.examplesRootPath + "\\logFile\\" + ImportPath.projectName + "\\verify pattern.txt");
         */
 //        System.out.println(FixVerification.verify());
-        return verifyFlag;
+
+        //先将生成补丁后的程序编译成class文件
+        //因为jpf文件要对class文件处理
+        //架包路径一般可以为空，原来文件路径，目标路径
+        Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
+        Set<String> jars = new HashSet<String>();
+        GenerateClass.compile(jars.toArray(new String[jars.size()]),
+                files.toArray(new String[files.size()]),
+                classpath);
+        return FixVerification.verify(classpath);
     }
 
-    private static void useUnicorn(int type, String classpath) {
+    private static void useUnicorn(String classpath) {
         Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
-
-        /*if (type == UnicornType.getPattern) {
-            classpath = ImportPath.examplesRootPath + "\\out\\production\\Patch";
-        } else if (type == UnicornType.verify) {
-            classpath = ImportPath.verifyPath + "\\generateClass";
-        }*/
-
-        if (type == UnicornType.verify) {
-            //先将生成补丁后的程序编译成class文件
-            //因为jpf文件要对class文件处理
-            //源路径，目标路径
-//            GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
-            Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
-            Set<String> jars = new HashSet<String>();
-            GenerateClass.compile(jars.toArray(new String[jars.size()]),
-                    files.toArray(new String[files.size()]),
-                    ImportPath.verifyPath + "\\generateClass");
-        }
 
         for (int i = 0; i < 100; ++i) {
             String[] str = new String[]{
@@ -122,11 +108,6 @@ public class Unicorn {
             //jpf中产生这种情况的原因不明
             seq = reduceSeq(seq);
 
-            if (type == UnicornType.verify) {
-                if (!seq.getResult()) {
-                    verifyFlag = false;
-                }
-            }
 
             outer:
             for (Pattern pattern : seq.getPatterns()) {
