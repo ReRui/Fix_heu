@@ -171,6 +171,7 @@ public class Fix {
         lockAdjust.adjust(addSyncFilePath);//合并锁
     }
 
+    //对一个线程中的node进行加锁
     private static void addSynchronized(List<ReadWriteNode> rwnList, int type) {
         int firstLoc = 0, lastLoc = 0;
 
@@ -250,6 +251,9 @@ public class Fix {
                 //跨类搜索
                 useSoot.getCallGraph(rwnList.get(0), rwnList.get(1));
 
+                //得到加锁位置
+                firstLoc = useSoot.getMinLine();
+                lastLoc = useSoot.getMaxLine();
                 /*//如果pattern来自同一个类，那么跨类之后加的是this锁
                 String classNameOne = rwnList.get(0).getPosition().split("\\.")[0].replaceAll("/", ".");
                 String classNameTwo = rwnList.get(1).getPosition().split("\\.")[0].replaceAll("/", ".");
@@ -260,9 +264,18 @@ public class Fix {
 
                 }*/
 
-                //暂定为都加静态锁，this锁不一定对
-                examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-                lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
+
+                //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
+                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
+                    //判断加锁会不会和for循环等交叉
+                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
+                    firstLoc = lockLine.getFirstLoc();
+                    lastLoc = lockLine.getLastLoc();
+
+                    //暂定为都加静态锁，this锁不一定对
+                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                    lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
+                }
                 //先不删这一段
 /*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
