@@ -419,7 +419,7 @@ public class Fix {
         System.exit(-1);*/
 
         //跨类搜索
-            useSoot.getCallGraph(patternCounter.getNodes()[1], patternCounter.getNodes()[0]);
+            useSoot.getCallGraph(patternCounter.getNodes()[0], patternCounter.getNodes()[1]);
 
             UseASTAnalysisClass.useASTToaddStaticObject(ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
 
