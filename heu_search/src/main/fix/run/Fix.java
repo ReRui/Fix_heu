@@ -137,42 +137,15 @@ public class Fix {
             fixPatternOneToThree(patternCounter.getPattern());
         } else if (length == 3) {
             fixMethods += "修复二\n";
-            fixPatternFourToEight(patternCounter.getPattern());
+            fixPatternFourToSeventeen(patternCounter.getPattern());
         } else if (length == 4) {
             fixMethods += "修复三\n";
-            fixPatterNineToSeventeen(patternCounter.getPattern());
+            fixPatternFourToSeventeen(patternCounter.getPattern());
         }
     }
 
-    //长度为4的添加同步
-    private static void fixPatterNineToSeventeen(Pattern patternCounter) {
-        //是否可行？
-        //根据线程将三个结点分为两个list
-        List<ReadWriteNode> threadA = new ArrayList<ReadWriteNode>();//线程A的结点
-        List<ReadWriteNode> threadB = new ArrayList<ReadWriteNode>();//线程B的结点
-        String threadName = "";
-        for (int i = 0; i < 4; i++) {
-            ReadWriteNode node = patternCounter.getNodes()[i];
-            if (i == 0) {//把第一个结点放入A的list
-                threadName = node.getThread();
-                threadA.add(node);
-            } else {
-                if (threadName.equals(node.getThread())) {//线程相同，放入同一个list
-                    threadA.add(node);
-                } else {//不同就放入另一个list
-                    threadB.add(node);
-                }
-            }
-        }
-
-        addSynchronized(threadA, AddSyncType.globalStaticSync);
-        lockAdjust.setOneLockFinish(true);//表示第一次执行完
-        addSynchronized(threadB, AddSyncType.globalStaticSync);
-        lockAdjust.adjust(addSyncFilePath);//合并锁
-    }
-
-    //长度为3添加同步
-    private static void fixPatternFourToEight(Pattern patternCounter) {
+    //长度为3或4，添加同步
+    private static void fixPatternFourToSeventeen(Pattern patternCounter) {
         //根据线程将三个结点分为两个list
         List<ReadWriteNode> threadA = new ArrayList<ReadWriteNode>();//线程A的结点
         List<ReadWriteNode> threadB = new ArrayList<ReadWriteNode>();//线程B的结点
@@ -276,7 +249,8 @@ public class Fix {
             } else {//不在一个函数中
                 //跨类搜索
                 useSoot.getCallGraph(rwnList.get(0), rwnList.get(1));
-                //如果pattern来自同一个类，那么跨类之后加的是this锁
+
+                /*//如果pattern来自同一个类，那么跨类之后加的是this锁
                 String classNameOne = rwnList.get(0).getPosition().split("\\.")[0].replaceAll("/", ".");
                 String classNameTwo = rwnList.get(1).getPosition().split("\\.")[0].replaceAll("/", ".");
                 if (classNameOne.equals(classNameTwo)) {
@@ -284,7 +258,10 @@ public class Fix {
                 } else {
                     examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
 
-                }
+                }*/
+
+                //暂定为都加静态锁，this锁不一定对
+                examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                 lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
                 //先不删这一段
 /*                for (int i = 0; i < rwnList.size(); i++) {
@@ -415,15 +392,15 @@ public class Fix {
     private static void fixPatternOneToThree(Pattern patternCounter) {
 
 
-       /* if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
+        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
             addSignal(patternCounter);
-        } else {*/
+        } else {
             //为长度为2的pattern添加同步
             fixMethods += "添加同步\n";
             addSyncPatternOneToThree(patternCounter);
-//        }
+        }
     }
 
 

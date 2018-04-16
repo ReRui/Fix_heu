@@ -30,13 +30,13 @@ public abstract class DistanceBasedSearch extends Search {
     }
 
     @Override
-    public boolean requestBacktrack () {
+    public boolean requestBacktrack() {
         doBacktrack = true;
         return true;
     }
 
     @Override
-    public boolean supportsBacktrack () {
+    public boolean supportsBacktrack() {
         return true;
     }
 
@@ -52,19 +52,19 @@ public abstract class DistanceBasedSearch extends Search {
         RestorableVMState init_state = vm.getRestorableState();
         int count = 0;
         outer:
-        while(!done){
+        while (!done) {
             count++;
             for (SearchListener listener : listeners) {
                 if (listener instanceof BasicPatternFindingListener) {
-                    BasicPatternFindingListener bpfl = (BasicPatternFindingListener)listener;
+                    BasicPatternFindingListener bpfl = (BasicPatternFindingListener) listener;
                     if (bpfl.getMod().equals(BasicPatternFindingListener.MOD.VERIFY) && correctSeqs.size() > 200) {
-                        System.out.println("---------------------------------------200 search finished---------------------------------");
+//                        System.out.println("---------------------------------------200 search finished---------------------------------");
                         break outer;
                     }
                 }
             }
 
-            if(isEndState()){
+            if (isEndState()) {
                 //设置正确执行序列的状态为TRUE
                 sequence.setResult(true);
                 sequence.setFinished(true);
@@ -78,24 +78,24 @@ public abstract class DistanceBasedSearch extends Search {
 //                System.out.println("find a correct Sequence :");
                 continue;
             }
-            while(forward()){
+            while (forward()) {
 
                 notifyStateAdvanced();
                 //将当前的状态合并到上一状态之后，并添加到队列中
-                queue.add(mergeSeq(sequence,revSequence));
-                if(currentError != null){
+                queue.add(mergeSeq(sequence, revSequence));
+                if (currentError != null) {
                     notifyPropertyViolated();
-                    if(hasPropertyTermination()){
+                    if (hasPropertyTermination()) {
                         errorSequence = sequence;
                         break;
                     }
                 }
-                if(!checkStateSpaceLimit()){
+                if (!checkStateSpaceLimit()) {
                     notifySearchConstraintHit("memory limit reached: " + minFreeMemory);
                     //can't go on, we exhausted our memory
                     break;
                 }
-                if(backtrack()){
+                if (backtrack()) {
                     //回溯
                     notifyStateBacktracked();
                 }
@@ -116,14 +116,14 @@ public abstract class DistanceBasedSearch extends Search {
 //            }
 //            System.out.println("");
             //根据阈值删除队列中多余的sequence
-            while(queue.size() > scheduleThreshod){
+            while (queue.size() > scheduleThreshod) {
                 queue.removeLast();
             }
             //判断当前队列中是否存在sequence，当队列size 小于0 表明找到一个正确的sequence
-            if(queue.size() > 0){
+            if (queue.size() > 0) {
                 sequence = queue.poll();
                 vm.restoreState(sequence.getLastState().getState());
-            }else{
+            } else {
                 //将所有正确的sequence添加到正确的序列集合中
                 sequence.setResult(true);
                 sequence.setFinished(true);
@@ -137,12 +137,12 @@ public abstract class DistanceBasedSearch extends Search {
         notifySearchFinished();
     }
 
-    protected  Sequence mergeSeq(Sequence seqOld,Sequence seqNew){
+    protected Sequence mergeSeq(Sequence seqOld, Sequence seqNew) {
 
-        if(seqOld!=null){
+        if (seqOld != null) {
             SearchState currentState = seqNew.getLastState();
-            return seqOld.advance(currentState.getStateId(),currentState.getState(),seqNew.getNodes());
-        }else{
+            return seqOld.advance(currentState.getStateId(), currentState.getState(), seqNew.getNodes());
+        } else {
             return seqNew;
         }
 
@@ -152,7 +152,7 @@ public abstract class DistanceBasedSearch extends Search {
         correctSeqs.add(seqs);
     }
 
-    public void addCurrentSequence(Sequence seq){
+    public void addCurrentSequence(Sequence seq) {
         this.revSequence = seq;
     }
 
