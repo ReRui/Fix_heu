@@ -40,4 +40,9 @@ public class NodeSequence {
         return idList;
     }
 
+
+    @Override
+    public String toString() {
+        return element +"," + field + "," + position;
+    }
 }

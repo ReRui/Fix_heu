@@ -44,6 +44,12 @@ public class RecordSequence {
             }
         }
 
+        /*for(int i = 0; i < nodeSequenceList.size(); i++)
+            System.out.println(nodeSequenceList.get(i).getIdList());
+        System.out.println("========");*/
+
+//        System.exit(-1);
+
         //得到所有readwritenode信息，这里
         //只为了关联变量考虑，其实还可以优化
         //比如将读写节点和后面的分类结合
@@ -76,7 +82,7 @@ public class RecordSequence {
         return matchResult;
     }
 
-    //是不是最后一次操作
+    //是不是原来语句最后一次操作
     public static boolean isLast(ReadWriteNode readWriteNode) {
         for (int i = 0; i < nodeSequenceList.size(); i++) {
             NodeSequence nodeS = nodeSequenceList.get(i);
@@ -89,7 +95,7 @@ public class RecordSequence {
         return false;
     }
 
-    //是不是第一次操作
+    //是不是原来语句第一次操作
     public static boolean isFirst(ReadWriteNode readWriteNode) {
         for (int i = 0; i < nodeSequenceList.size(); i++) {
             NodeSequence nodeS = nodeSequenceList.get(i);
