@@ -64,8 +64,8 @@ public class UseSoot {
         //利用soot得到调用图
         Set<CommonCaller> callGraphInfo = Main.getCallGraphInfo(classNameOne, classLineOne, classNameTwo, classLineTwo);
 
-        System.out.println(callGraphInfo);
-        System.exit(-1);
+        /*System.out.println(callGraphInfo);
+        System.exit(-1);*/
 
         for (CommonCaller caller : callGraphInfo) {
             syncJava = caller.getMethod().getClassName();

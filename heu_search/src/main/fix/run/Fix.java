@@ -201,7 +201,9 @@ public class Fix {
     private static void addSynchronized(List<ReadWriteNode> rwnList, int type) {
         int firstLoc = 0, lastLoc = 0;
 
-        String lockName = "";
+        String lockName = "";//用来表示加锁的名称
+
+        String lockFile = "";//用来表示加锁文件
 
         //判断A中有几个变量
         if (rwnList.size() > 1) {//两个变量
@@ -268,6 +270,8 @@ public class Fix {
                     } else {//有加锁的，直接修改原有锁
                         UseOldSyncToFix.adjustOldSync(existLock.getLockName(), firstLoc, lastLoc + 1, existLock.getStartLine(), existLock.getEndLine(), addSyncFilePath);
                     }
+
+                    lockFile = addSyncFilePath;
                 }
             } else {//不在一个函数中
                 //跨类搜索
@@ -281,7 +285,8 @@ public class Fix {
                     examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
 
                 }
-                //先保留这一段
+                lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
+                //先不删这一段
 /*                for (int i = 0; i < rwnList.size(); i++) {
                     ReadWriteNode node = rwnList.get(i);
                     firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
@@ -330,17 +335,19 @@ public class Fix {
 
                 //然后加锁
                 examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
+
+                lockFile = addSyncFilePath;
             }
         }
 
         //记录加锁位置
         //便于以后调整
         if (!lockAdjust.isOneLockFinish()) {
-            lockAdjust.setOneLockName(lockName);
+            lockAdjust.setOneLockFile(lockFile);
             lockAdjust.setOneFirstLoc(firstLoc);
             lockAdjust.setOneLastLoc(lastLoc + 1);
         } else {
-            lockAdjust.setTwoLockName(lockName);
+            lockAdjust.setTwoLockFile(lockFile);
             lockAdjust.setTwoFirstLoc(firstLoc);
             lockAdjust.setTwoLastLoc(lastLoc + 1);
         }
@@ -408,15 +415,15 @@ public class Fix {
     private static void fixPatternOneToThree(Pattern patternCounter) {
 
 
-        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
+       /* if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
             addSignal(patternCounter);
-        } else {
+        } else {*/
             //为长度为2的pattern添加同步
             fixMethods += "添加同步\n";
             addSyncPatternOneToThree(patternCounter);
-        }
+//        }
     }
 
 
@@ -497,12 +504,12 @@ public class Fix {
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
                     if (!lockAdjust.isOneLockFinish()) {
-                        lockAdjust.setOneLockName(lockName);
+                        lockAdjust.setOneLockFile(lockName);
                         lockAdjust.setOneFirstLoc(firstLoc);
                         lockAdjust.setOneLastLoc(lastLoc + 1);
                         lockAdjust.setOneLockFinish(true);
                     } else {
-                        lockAdjust.setTwoLockName(lockName);
+                        lockAdjust.setTwoLockFile(lockName);
                         lockAdjust.setTwoFirstLoc(firstLoc);
                         lockAdjust.setTwoLastLoc(lastLoc + 1);
                     }
