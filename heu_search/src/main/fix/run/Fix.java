@@ -406,43 +406,17 @@ public class Fix {
     }
 
     private static void fixPatternOneToThree(Pattern patternCounter) {
-        //如果pattern来自同一个类，那么跨类之后加的是this锁
-        //这里需要考虑到一点，比如pattern是来自一个类，但是在它们可能被不同类调用
-        //这时要加静态object锁
-        String classNameOne = patternCounter.getNodes()[0].getPosition().split("\\.")[0].replaceAll("/", ".");
-        String classNameTwo = patternCounter.getNodes()[1].getPosition().split("\\.")[0].replaceAll("/", ".");
-        if (!classNameOne.equals(classNameTwo)) {
 
-            //跨类搜索
-            useSoot.getCallGraph(patternCounter.getNodes()[0], patternCounter.getNodes()[1]);
 
-            UseASTAnalysisClass.useASTToaddStaticObject(ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-
-            int firstLoc = useSoot.getMinLine(), lastLoc = useSoot.getMaxLine();
-            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-            firstLoc = lockLine.getFirstLoc();
-            lastLoc = lockLine.getLastLoc();
-
-            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "objectFix", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-        }
-
-        /*for (int i = 0; i < 2; i++) {
-            if (patternCounter.getNodes()[i].getType().equals("READ")) {
-                readNode = patternCounter.getNodes()[i];
-            } else if (patternCounter.getNodes()[i].getType().equals("WRITE")) {
-                writeNode = patternCounter.getNodes()[i];
-            }
-        }*/
-
-        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
+       /* if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
             //为长度为2的pattern添加同步
             fixMethods += "添加信号量\n";
             addSignal(patternCounter);
-        } else {
+        } else {*/
             //为长度为2的pattern添加同步
             fixMethods += "添加同步\n";
             addSyncPatternOneToThree(patternCounter);
-        }
+//        }
     }
 
 
@@ -456,7 +430,7 @@ public class Fix {
             rwnList.add(patternCounter.getNodes()[i]);
         }
         boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
-        System.out.println("在不在一个函数中" + flagSame + "," + rwnList);
+
         if (flagSame) {//在一个函数中
             int oneLoc = Integer.parseInt(patternCounter.getNodes()[0].getPosition().split(":")[1]);
             int twoLoc = Integer.parseInt(patternCounter.getNodes()[1].getPosition().split(":")[1]);
@@ -475,9 +449,30 @@ public class Fix {
                     examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);//待定
                 }
             }
-            return;
+        } else {//需要跨类修复
+
+            //如果pattern来自同一个类，那么跨类之后加的是this锁
+            //这里需要考虑到一点，比如pattern是来自一个类，但是在它们可能被不同类调用
+            //这时要还是加静态object锁
+            //全部加静态object锁
+
+            //跨类搜索
+            useSoot.getCallGraph(patternCounter.getNodes()[0], patternCounter.getNodes()[1]);
+
+            UseASTAnalysisClass.useASTToaddStaticObject(ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+
+            firstLoc = useSoot.getMinLine();
+            lastLoc = useSoot.getMaxLine();
+            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+            firstLoc = lockLine.getFirstLoc();
+            lastLoc = lockLine.getLastLoc();
+
+            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "objectFix", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+
         }
-        for (int i = 0; i < 2; i++) {
+
+        //先注释，先改完soot
+/*        for (int i = 0; i < 2; i++) {
             String position = patternCounter.getNodes()[i].getPosition();
             String[] positionArg = position.split(":");
 
@@ -516,7 +511,7 @@ public class Fix {
                     lockAdjust.adjust(addSyncFilePath);
                 }
             }
-        }
+        }*/
     }
 
     //添加信号量修复顺序违背

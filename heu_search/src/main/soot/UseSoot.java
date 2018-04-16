@@ -40,8 +40,8 @@ public class UseSoot {
 //        ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
 //        ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");
         //ÄÃ²»µ½signature
-        ReadWriteNode rw1 = new ReadWriteNode(1, "account2.Account@167", "Balance", "WRITE", "Thread-2", "buggyprogram/BuggyProgram.java:352");
-        ReadWriteNode rw2 = new ReadWriteNode(2, "account2.Account@167", "Balance", "READ", "Thread-1", "buggyprogram/BuggyProgram.java:367");
+        ReadWriteNode rw1 = new ReadWriteNode(1, "stringbuffer.StringBuffer@166", "count", "WRITE", "Thread-2", "stringbuffer/StringBuffer.java:668");
+        ReadWriteNode rw2 = new ReadWriteNode(2, "stringbuffer.StringBuffer@166", "count", "READ", "Thread-1", "stringbuffer/StringBuffer.java:328");
         /*ReadWriteNode rw1 = new ReadWriteNode(1, "account2.Account@167", "Balance", "WRITE", "Thread-2", "buggyprogram/BuggyProgram.java:352");
         ReadWriteNode rw2 = new ReadWriteNode(2, "account2.Account@167", "Balance", "READ", "Thread-1", "buggyprogram/BuggyProgram.java:367");*/
 

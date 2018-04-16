@@ -44,11 +44,13 @@ public class CallGraphBuild {
         visited2.add(callRowRight);
 
         while (extend(visited1)) ;
+        System.out.println(visited1 + "1111111111111111111");
 
         Set<CommonCaller> result = new HashSet<>();
         CommonCaller caller = sameMethod(visited1, callRowRight);
         if (caller != null) {
             result.add(caller);
+            System.out.println(caller + "cllllllll");
         }
         Set<CommonCaller> resultPart = extend(visited1, visited2);
 
@@ -56,6 +58,7 @@ public class CallGraphBuild {
             result.addAll(resultPart);
             resultPart = extend(visited1, visited2);
         }
+        System.out.println(visited2 + "2222222222222222");
         return result;
     }
 
