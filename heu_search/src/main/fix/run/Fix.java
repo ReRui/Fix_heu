@@ -41,7 +41,7 @@ public class Fix {
     static long endFixTime = 0;
 
     //全局静态变量
-    static GlobalStaticObject globalStaticObject = new GlobalStaticObject();
+    static GlobalStaticObject globalStaticObject = GlobalStaticObject.getInstance();
 
     //用于跨类修复
     static UseSoot useSoot = UseSoot.getInstance();
@@ -179,13 +179,14 @@ public class Fix {
             }
         }
 
+        //长度为3加this锁
         if(patternCounter.getNodes().length == 3){
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.localSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
-        } else if (patternCounter.getNodes().length == 4){
+        } else if (patternCounter.getNodes().length == 4){//长度为4加静态锁？
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.globalStaticSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
@@ -232,12 +233,12 @@ public class Fix {
                         //实际上是不对的
                         lockName = acquireLockName(node);
                     } else if (type == AddSyncType.globalStaticSync) {//需要添加全局锁
-                        if (!GlobalStaticObject.isDefineObject) {
+                        if (!globalStaticObject.isDefineObject) {
                             lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
-                            GlobalStaticObject.objectName = lockName;
-                            GlobalStaticObject.isDefineObject = true;
+                            globalStaticObject.objectName = lockName;
+                            globalStaticObject.isDefineObject = true;
                         } else {
-                            lockName = GlobalStaticObject.objectName;
+                            lockName = globalStaticObject.objectName;
                         }
                     }
                     int poi = Integer.parseInt(node.getPosition().split(":")[1]);
