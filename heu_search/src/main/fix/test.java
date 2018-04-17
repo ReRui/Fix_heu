@@ -1,5 +1,7 @@
 package fix;
 
+import fix.analyzefile.CheckWhetherLocked;
+import fix.entity.ImportPath;
 import org.eclipse.jdt.core.dom.*;
 
 import java.io.BufferedReader;
@@ -14,7 +16,9 @@ public class Test {
 
 
     public static void main(String[] args) {
-        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
+//        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
+//        System.out.println(CheckWhetherLocked.check("wrongLock/WrongLock.java:30", "value", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
+        System.out.println(CheckWhetherLocked.check("linkedlist/MyLinkedList.java:30", "_next", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
     }
 
 

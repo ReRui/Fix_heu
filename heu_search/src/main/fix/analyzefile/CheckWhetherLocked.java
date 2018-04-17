@@ -13,8 +13,8 @@ public class CheckWhetherLocked {
     //要寻找的变量的位置,形式必须是   包名/java文件：行数1
     //"account/Account.java:32"
     public static void main(String[] args) {
-        System.out.println(check("linkedlist/MyLinkedList.java:44","_next", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\linkedlist\\MyLinkedList.java"));
-        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
+        System.out.println(check("wrongLock/WrongLock.java:30","value", ImportPath.examplesRootPath + "/out/production/Patch","D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
+//        UseASTAnalysisClass.setFlagUseASTCheckWhetherLock(false);
     }
     public static boolean check(String variableLoc, String variableName, String classpath, String javaFilePath) {
         String[] str = new String[]{
@@ -42,7 +42,9 @@ public class CheckWhetherLocked {
         //AST分析不出来synchronized 方法
         //所以两种方法结合
 
-        return flagUseJPFCheckWhetherLock || flagUseASTCheckWhetherLock;
+
+//        return flagUseJPFCheckWhetherLock || flagUseASTCheckWhetherLock;
+        return flagUseJPFCheckWhetherLock;
     }
 
 }

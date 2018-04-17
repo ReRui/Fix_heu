@@ -26,12 +26,12 @@ public class Unicorn {
         String pName = split[split.length - 1];
 
         /*System.setProperty("user.dir", "C:\\Users\\lhr\\Desktop\\verify\\HashSet");
-        System.setProperty("projectName", "HashSet");
+        System.setProperty("projectName", "HashSet");data
 
         System.out.println(System.getProperty("projectName"));*/
 
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
