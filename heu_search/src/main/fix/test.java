@@ -18,7 +18,7 @@ public class Test {
     public static void main(String[] args) {
 //        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
 //        System.out.println(CheckWhetherLocked.check("wrongLock/WrongLock.java:30", "value", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
-        System.out.println(CheckWhetherLocked.check("linkedlist/MyLinkedList.java:30", "_next", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
+        useASTChangeLine("D:/Patch/examples/wrongLock/wrongLock.java");
     }
 
 
@@ -34,54 +34,36 @@ public class Test {
     }
 
 
-    public static void useASTChangeLine(int lockStart, int locEnd, int functionStart, int functionEnd, String filePath) {
-
-
-    }
 
     public static void useASTChangeLine(String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        /*char[] fileContents = getFileContents(new File(filePath));
-        for (char c : fileContents)
-            System.out.print(c);
-*/
+
         final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 
         cu.accept(new ASTVisitor() {
-            @Override
-            public boolean visit(TypeDeclaration node) {
-                /*System.out.println(node);
-                System.out.println(cu.getLineNumber(node.getStartPosition()));
-                System.out.println(cu.getLineNumber(node.getStartPosition() + node.getLength()));*/
-                return super.visit(node);
-            }
+
+            //在锁中，有哪些变量被定义了
+            Set<String> varDefInSync = new HashSet<String>();
 
 
             @Override
-            public boolean visit(MemberValuePair node) {
-                System.out.println(node);
-                return super.visit(node);
-            }
-/* @Override
-            public boolean visit(TryStatement node) {
-                System.out.println(node + "===========>");
+            public boolean visit(VariableDeclarationFragment node) {
+                this.varDefInSync.add(node.getName().getIdentifier());
                 return super.visit(node);
             }
 
             @Override
-            public boolean visit(TypeDeclarationStatement node) {
-                System.out.println(node + "===========>");
+            public boolean visit(SimpleName node) {
+
+//                if(this.varDefInSync.contains(node.getIdentifier())){
+                    System.out.println(node.getIdentifier());
+                    System.out.println(cu.getLineNumber(node.getStartPosition()));
+//                }
                 return super.visit(node);
             }
-
-            @Override
-            public boolean visit(ClassInstanceCreation node) {
-                System.out.println(node + "ClassInstanceCreation");
-                return super.visit(node);
-            }*/
 
         });
     }
