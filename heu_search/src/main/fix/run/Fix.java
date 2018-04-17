@@ -179,11 +179,20 @@ public class Fix {
             }
         }
 
-        //根据获得的list，进行加锁
-        addSynchronized(threadA, AddSyncType.localSync);
-        lockAdjust.setOneLockFinish(true);//表示第一次执行完
-        addSynchronized(threadB, AddSyncType.localSync);
-        lockAdjust.adjust(addSyncFilePath);//合并锁
+        if(patternCounter.getNodes().length == 3){
+            //根据获得的list，进行加锁
+            addSynchronized(threadA, AddSyncType.localSync);
+            lockAdjust.setOneLockFinish(true);//表示第一次执行完
+            addSynchronized(threadB, AddSyncType.localSync);
+            lockAdjust.adjust(addSyncFilePath);//合并锁
+        } else if (patternCounter.getNodes().length == 4){
+            //根据获得的list，进行加锁
+            addSynchronized(threadA, AddSyncType.globalStaticSync);
+            lockAdjust.setOneLockFinish(true);//表示第一次执行完
+            addSynchronized(threadB, AddSyncType.globalStaticSync);
+            lockAdjust.adjust(addSyncFilePath);//合并锁
+        }
+
     }
 
     //对一个线程中的node进行加锁
@@ -466,7 +475,6 @@ public class Fix {
             examplesIO.addVolatileDefine(flagDefineLocation, "volatile bool flagFix = false;", addSyncFilePath);//待修订
 
             //添加信号量判断,
-            //待定，只执行一句我就加了分号，这样是否可行？
             examplesIO.addVolatileIf(flagAssertLocation, addSyncFilePath);//待修订
 
             //添加信号为true的那条语句，那条语句应该在定义的后一行

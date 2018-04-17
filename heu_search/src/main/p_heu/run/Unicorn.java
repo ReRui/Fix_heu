@@ -30,8 +30,8 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
-        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -75,7 +75,7 @@ public class Unicorn {
     }
 
     private static void useUnicorn(String classpath) {
-//        Pattern.setPatternSet("unicorn");
+        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 
