@@ -30,9 +30,8 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-//        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, ImportPath.verifyPath + "\\generateClass");
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -58,21 +57,25 @@ public class Unicorn {
         //将拿到的pattern写入文件中
         InsertCode.writeToFile(patternCountersList.toString(), ImportPath.examplesRootPath + "\\logFile\\" + ImportPath.projectName + "\\verify pattern.txt");
         */
-//        System.out.println(FixVerification.verify());
+
+
+//        Examin中的验证，但是在这不成功
 
         //先将生成补丁后的程序编译成class文件
         //因为jpf文件要对class文件处理
         //架包路径一般可以为空，原来文件路径，目标路径
-        Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
+        /*Set<String> files = GenerateClass.getAllFiles(new File(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName), ".java");
         Set<String> jars = new HashSet<String>();
         GenerateClass.compile(jars.toArray(new String[jars.size()]),
                 files.toArray(new String[files.size()]),
-                classpath);
+                classpath);*/
+        GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
         return FixVerification.verify(classpath);
+
     }
 
     private static void useUnicorn(String classpath) {
-        Pattern.setPatternSet("unicorn");
+//        Pattern.setPatternSet("unicorn");
         //将原来的清空
         patternCountersList.clear();
 

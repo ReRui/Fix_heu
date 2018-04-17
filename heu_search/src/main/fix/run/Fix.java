@@ -134,18 +134,33 @@ public class Fix {
         int length = patternCounter.getPattern().getNodes().length;
         if (length == 2) {
             fixMethods += "修复一\n";
-            fixPatternOneToThree(patternCounter.getPattern());
+            usePatternToDistinguish(patternCounter.getPattern());
         } else if (length == 3) {
             fixMethods += "修复二\n";
-            fixPatternFourToSeventeen(patternCounter.getPattern());
+            usePatternToAddSync(patternCounter.getPattern());
         } else if (length == 4) {
             fixMethods += "修复三\n";
-            fixPatternFourToSeventeen(patternCounter.getPattern());
+            usePatternToAddSync(patternCounter.getPattern());
+        }
+    }
+
+    //长度为2，先分情况
+    private static void usePatternToDistinguish(Pattern patternCounter) {
+
+
+        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
+            //为长度为2的pattern添加同步
+            fixMethods += "添加信号量\n";
+            addSignal(patternCounter);
+        } else {
+            //为长度为2的pattern添加同步,与3和4是不同的情况
+            fixMethods += "添加同步\n";
+            addSyncPatternOneToThree(patternCounter);
         }
     }
 
     //长度为3或4，添加同步
-    private static void fixPatternFourToSeventeen(Pattern patternCounter) {
+    private static void usePatternToAddSync(Pattern patternCounter) {
         //根据线程将三个结点分为两个list
         List<ReadWriteNode> threadA = new ArrayList<ReadWriteNode>();//线程A的结点
         List<ReadWriteNode> threadB = new ArrayList<ReadWriteNode>();//线程B的结点
@@ -261,14 +276,13 @@ public class Fix {
                     examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "this", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                 } else {
                     examplesIO.addLockToOneVar(useSoot.getMinLine(), useSoot.getMaxLine() + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-
                 }*/
 
 
                 //判断加锁区域在不在构造函数，或者加锁变量是不是成员变量
-                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
+                if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
                     //判断加锁会不会和for循环等交叉
-                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
+                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
 
@@ -276,37 +290,6 @@ public class Fix {
                     examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "obj", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                     lockFile = ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava();
                 }
-                //先不删这一段
-/*                for (int i = 0; i < rwnList.size(); i++) {
-                    ReadWriteNode node = rwnList.get(i);
-                    firstLoc = Integer.parseInt(node.getPosition().split(":")[1]);
-                    lastLoc = firstLoc;
-                    //每个都检查是不是加锁
-                    if (!CheckWhetherLocked.check(node.getPosition(), node.getField(), sourceClassPath, addSyncFilePath)) {
-                        //然后检查是不是成员变量或构造函数
-                        if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, addSyncFilePath)) {
-                            //最后得到需要加什么锁
-                            if (type == AddSyncType.localSync) {
-                                lockName = acquireLockName(node);
-                            } else if (type == AddSyncType.globalStaticSync) {
-                                if (!GlobalStaticObject.isDefineObject) {
-                                    lockName = UseASTAnalysisClass.useASTToaddStaticObject(addSyncFilePath);
-                                    GlobalStaticObject.objectName = lockName;
-                                    GlobalStaticObject.isDefineObject = true;
-                                } else {
-                                    lockName = GlobalStaticObject.objectName;
-                                }
-                            }
-                            //判断加锁会不会和for循环等交叉
-                            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
-                            firstLoc = lockLine.getFirstLoc();
-                            lastLoc = lockLine.getLastLoc();
-
-                            //加锁
-                            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);
-                        }
-                    }
-                }*/
             }
         } else {
             //对于一个变量，检查它是否已经被加锁
@@ -402,20 +385,6 @@ public class Fix {
         return existLock;
     }
 
-    private static void fixPatternOneToThree(Pattern patternCounter) {
-
-
-        if (RecordSequence.isLast(patternCounter.getNodes()[0]) || RecordSequence.isFirst(patternCounter.getNodes()[1])) {
-            //为长度为2的pattern添加同步
-            fixMethods += "添加信号量\n";
-            addSignal(patternCounter);
-        } else {
-            //为长度为2的pattern添加同步
-            fixMethods += "添加同步\n";
-            addSyncPatternOneToThree(patternCounter);
-        }
-    }
-
 
     //对长度为2的pattern添加同步
     private static void addSyncPatternOneToThree(Pattern patternCounter) {
@@ -448,67 +417,31 @@ public class Fix {
             }
         } else {//需要跨类修复
 
-            //如果pattern来自同一个类，那么跨类之后加的是this锁
             //这里需要考虑到一点，比如pattern是来自一个类，但是在它们可能被不同类调用
             //这时要还是加静态object锁
-            //全部加静态object锁
+            //暂定全部加静态object锁
 
             //跨类搜索
             useSoot.getCallGraph(patternCounter.getNodes()[0], patternCounter.getNodes()[1]);
 
+            //添加静态变量定义
             UseASTAnalysisClass.useASTToaddStaticObject(ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-
+            //得到加锁起始终止行
             firstLoc = useSoot.getMinLine();
             lastLoc = useSoot.getMaxLine();
-            UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
-            firstLoc = lockLine.getFirstLoc();
-            lastLoc = lockLine.getLastLoc();
+            //是不是成员变量或者在构造函数里面
+            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc + 1, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
+                //判断加锁会不会和for循环等交叉
+                UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                firstLoc = lockLine.getFirstLoc();
+                lastLoc = lockLine.getLastLoc();
 
-            examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "objectFix", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                //加锁
+                examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, "objectFix", ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+
+            }
 
         }
-
-        //原是不考虑soot的，现在我已经引入soot来修复
-/*        for (int i = 0; i < 2; i++) {
-            String position = patternCounter.getNodes()[i].getPosition();
-            String[] positionArg = position.split(":");
-
-            //获取要加锁的锁名
-            //如果已有锁，直接用现有的锁
-            //如果没有，再寻找新锁
-            String lockName = acquireLockName(patternCounter.getNodes()[i]);
-
-            //此处就在一行加锁，所以行数一样
-            firstLoc = Integer.parseInt(positionArg[1]);
-            lastLoc = firstLoc;
-
-            if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(Integer.parseInt(positionArg[1]), Integer.parseInt(positionArg[1]) + 1, addSyncFilePath)) {
-                //加锁
-                //检查是否存在锁再加锁
-                if (!CheckWhetherLocked.check(position, patternCounter.getNodes()[i].getField(), sourceClassPath, addSyncFilePath)) {
-                    fixMethods += "加锁位置" + Integer.parseInt(positionArg[1]) + '\n';
-                    //判断一下能不能用当前的锁直接进行修复
-
-                    //判断加锁会不会和for循环等交叉
-                    UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
-                    firstLoc = lockLine.getFirstLoc();
-                    lastLoc = lockLine.getLastLoc();
-                    if (!lockAdjust.isOneLockFinish()) {
-                        lockAdjust.setOneLockFile(lockName);
-                        lockAdjust.setOneFirstLoc(firstLoc);
-                        lockAdjust.setOneLastLoc(lastLoc + 1);
-                        lockAdjust.setOneLockFinish(true);
-                    } else {
-                        lockAdjust.setTwoLockFile(lockName);
-                        lockAdjust.setTwoFirstLoc(firstLoc);
-                        lockAdjust.setTwoLastLoc(lastLoc + 1);
-                    }
-                    examplesIO.addLockToOneVar(firstLoc, lastLoc + 1, lockName, addSyncFilePath);//待定
-
-                    lockAdjust.adjust(addSyncFilePath);
-                }
-            }
-        }*/
     }
 
     //添加信号量修复顺序违背

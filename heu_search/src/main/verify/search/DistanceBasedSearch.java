@@ -74,8 +74,8 @@ public abstract class DistanceBasedSearch extends Search {
                 //当前序列置为空
                 sequence = null;
                 queue.clear();
-//                System.out.println("\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
-//                System.out.println("find a correct Sequence :");
+               /* System.out.println("\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+                System.out.println("find a correct Sequence :");*/
                 continue;
             }
             while (forward()) {
