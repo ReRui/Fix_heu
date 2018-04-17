@@ -88,7 +88,7 @@ public class Fix {
         //将所有的pattern打印出来，方便以后选择
         System.out.println(tempList);
 
-        System.out.print("输入准确的pattern：");
+        System.out.print("输入准确的pattern（最下面的是0）：");
         //此处需要手动选择
         Scanner sc = new Scanner(System.in);
         int whichToUse = sc.nextInt();//使用第几个pattern
@@ -180,13 +180,13 @@ public class Fix {
         }
 
         //长度为3加this锁
-        if(patternCounter.getNodes().length == 3){
+        if (patternCounter.getNodes().length == 3) {
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.localSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
             addSynchronized(threadB, AddSyncType.localSync);
             lockAdjust.adjust(addSyncFilePath);//合并锁
-        } else if (patternCounter.getNodes().length == 4){//长度为4加静态锁？
+        } else if (patternCounter.getNodes().length == 4) {//长度为4加静态锁？
             //根据获得的list，进行加锁
             addSynchronized(threadA, AddSyncType.globalStaticSync);
             lockAdjust.setOneLockFinish(true);//表示第一次执行完
@@ -293,6 +293,11 @@ public class Fix {
                 if (!UseASTAnalysisClass.isConstructOrIsMemberVariableOrReturn(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava())) {
                     //判断加锁会不会和for循环等交叉
                     UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
+                    firstLoc = lockLine.getFirstLoc();
+                    lastLoc = lockLine.getLastLoc();
+
+                    //检查会不会定义变量在锁内，使用变量在锁外
+                    lockLine = UseASTAnalysisClass.useASTCheckVariableInLock(firstLoc, lastLoc,ImportPath.examplesRootPath + "/exportExamples/" + useSoot.getSyncJava());
                     firstLoc = lockLine.getFirstLoc();
                     lastLoc = lockLine.getLastLoc();
 

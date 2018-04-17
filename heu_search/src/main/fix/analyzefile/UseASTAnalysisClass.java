@@ -1,6 +1,5 @@
 package fix.analyzefile;
 
-import fix.entity.ImportPath;
 import fix.entity.lock.ExistLock;
 import fix.io.ExamplesIO;
 import org.eclipse.jdt.core.dom.*;
@@ -54,7 +53,10 @@ public class UseASTAnalysisClass {
         /*useASTChangeLine(49, 50, "D:\\Patch\\examples\\critical\\Critical.java");
         System.out.println(lockLine.getFirstLoc() + "," + lockLine.getLastLoc());*/
 //        System.out.println(useASTToaddStaticObject(ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\Main.java"));
-        System.out.println(useASTCheckWhetherLock(42, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
+//        System.out.println(useASTCheckWhetherLock(42, ImportPath.examplesRootPath + "\\examples\\" + ImportPath.projectName + "\\MyLinkedList.java"));
+        lockLine = useASTCheckVariableInLock(444, 448, "D:/Patch/examples/stringbuffer/StringBuffer.java");
+        System.out.println(lockLine.getFirstLoc());
+        System.out.println(lockLine.getLastLoc());
     }
 
     //判断变量是不是在if(),while(),for()的判断中
@@ -72,6 +74,54 @@ public class UseASTAnalysisClass {
     public static boolean isConstructOrIsMemberVariableOrReturn(int firstLoc, int lastLoc, String filePath) {
         useASTAnalysisConAndMem(firstLoc, lastLoc, filePath);
         return flagConstruct || flagMember;
+    }
+
+    //利用AST来检查加锁之后，会不会出现变量定义在锁内，但是变量使用在锁歪的情况
+    public static LockLine useASTCheckVariableInLock(int lockStart, int locEnd, String filePath) {
+
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
+        parser.setSource(getFileContents(new File(filePath)));
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+
+        lockLine.setFirstLoc(lockStart);
+        lockLine.setLastLoc(locEnd);
+        final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(new ASTVisitor() {
+
+            //在锁中，有哪些变量被定义了
+            Set<String> varDefInSync = new HashSet<String>();
+
+            //函数结束的行数
+            int functionEnd = 0;
+
+            @Override
+            public boolean visit(MethodDeclaration node) {
+                if (cu.getLineNumber(node.getStartPosition()) <= lockStart && cu.getLineNumber(node.getStartPosition() + node.getLength()) >= locEnd) {
+                    this.functionEnd = cu.getLineNumber(node.getStartPosition() + node.getLength());
+                }
+                return super.visit(node);
+            }
+
+            @Override
+            public boolean visit(VariableDeclarationFragment node) {
+                if (cu.getLineNumber(node.getStartPosition()) >= lockStart && cu.getLineNumber(node.getStartPosition() + node.getLength()) <= locEnd) {
+                    this.varDefInSync.add(node.getName().getIdentifier());
+                }
+                return super.visit(node);
+            }
+
+            @Override
+            public boolean visit(SimpleName node) {
+                if (cu.getLineNumber(node.getStartPosition()) > locEnd && cu.getLineNumber(node.getStartPosition() + node.getLength()) <= this.functionEnd) {
+                    if (this.varDefInSync.contains(node.getIdentifier())) {
+                       lockLine.setLastLoc(cu.getLineNumber(node.getStartPosition() + node.getLength()));
+                    }
+                }
+                return super.visit(node);
+            }
+        });
+        return lockLine;
     }
 
     //利用AST来添加全局静态变量，用于加全局锁
@@ -110,7 +160,7 @@ public class UseASTAnalysisClass {
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "GBK"));
             while (((read = br.readLine()) != null)) {
-                if(read.contains("class")) {
+                if (read.contains("class")) {
                     break;
                 } else {
                     index++;
@@ -125,7 +175,7 @@ public class UseASTAnalysisClass {
         }
         ExamplesIO examplesIO = ExamplesIO.getInstance();
         objectName = "objectFix";
-        examplesIO.addStaticObject(index +1, objectName, filePath);
+        examplesIO.addStaticObject(index + 1, objectName, filePath);
 
         /*ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -238,8 +288,6 @@ public class UseASTAnalysisClass {
 
         cu.accept(new ASTVisitor() {
 
-            // Set<String> names = new HashSet<String>();//存放实际使用的变量，不这样做会有System等变量干扰
-
             public boolean visit(TypeDeclaration node) {
                 className = node.getName().toString();
                 return true;
@@ -247,20 +295,13 @@ public class UseASTAnalysisClass {
 
             //定义变量
             public boolean visit(VariableDeclarationFragment node) {
-                //判断是不是成员变量
-                SimpleName name = node.getName();
-                // this.names.add(name.getIdentifier());
 
-                return true; // do not continue to avoid usage info
+                return true;
             }
 
             //变量
             public boolean visit(SimpleName node) {
-                // if (this.names.contains(node.getIdentifier())) {
-//                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
-                   /* System.out.println(rwn1.getField() + "," + Integer.parseInt(rwn1.getPosition().split(":")[1]));
-                    System.out.println(rwn2.getField() + "," + Integer.parseInt(rwn2.getPosition().split(":")[1]));
-                    System.out.println("==============");*/
+
                 if (node.toString().equals(rwn1.getField()) && cu.getLineNumber(node.getStartPosition()) == Integer.parseInt(rwn1.getPosition().split(":")[1])) {
                     rw1Match = true;
                     rw1Node = node;
@@ -273,7 +314,6 @@ public class UseASTAnalysisClass {
                 if (rw1Match && rw2Match) {//两个读写点都找到的时候
                     flagSameFunction = isSameFunction(rw1Node, rw2Node);
                 }
-                //  }
                 return true;
             }
         });
@@ -332,7 +372,6 @@ public class UseASTAnalysisClass {
 
         cu.accept(new ASTVisitor() {
 
-            Set<String> names = new HashSet<String>();//存放实际使用的变量，不这样做会有System等变量干扰
 
             public boolean visit(TypeDeclaration node) {
                 className = node.getName().toString();
@@ -345,22 +384,15 @@ public class UseASTAnalysisClass {
                 if (cu.getLineNumber(node.getStartPosition()) >= firstLoc && cu.getLineNumber(node.getStartPosition()) <= lastLoc) {
                     flagMember = isMemberVariable(node);
                 }
-                SimpleName name = node.getName();
-//                System.out.println(isMemberVariable(node) + "test");
-//                this.names.add(name.getIdentifier());
 
-                return true; // do not continue to avoid usage info
+                return true;
             }
 
             //变量
             public boolean visit(SimpleName node) {
-//                if (this.names.contains(node.getIdentifier())) {
-//                    System.out.println("Usage of '" + node + "' at line " +	cu.getLineNumber(node.getStartPosition()));
-                //判断是不是构造函数
                 if (cu.getLineNumber(node.getStartPosition()) >= firstLoc && cu.getLineNumber(node.getStartPosition()) <= lastLoc) {
                     flagConstruct = isConstruct(node);
                 }
-//                }
                 return true;
             }
         });
