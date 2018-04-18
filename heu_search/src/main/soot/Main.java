@@ -1,5 +1,6 @@
 package soot;
 
+import analysis.CallSite;
 import analysis.Tools;
 import fix.entity.ImportPath;
 import soot.structure.entity.CommonCaller;
@@ -20,13 +21,14 @@ public class Main {
                 mainClass
         );
         Tools.getContainMethod(classpath, mainClass, classNameOne, classLineOne);
+        CallSite left = Tools.containMethod;
         String left_sign = Tools.containMethod.getSignature();
-        Tools.getContainMethod(classpath, mainClass, classNameOne, classLineTwo);
+        Tools.getContainMethod(classpath, mainClass, classNameTwo, classLineTwo);
+        CallSite right = Tools.containMethod;
         String right_sign = Tools.containMethod.getSignature();
 
-        Set<CommonCaller> callers = callGraphBuild.findCommonCaller(new Method(classNameOne, left_sign), classLineOne,
-                new Method(classNameTwo, right_sign), classLineTwo);
-
+        Set<CommonCaller> callers = callGraphBuild.findCommonCaller(new Method(left.getClassName(), left_sign), classLineOne,
+                new Method(right.getClassName(), right_sign), classLineTwo);
         return callers;
 
     }

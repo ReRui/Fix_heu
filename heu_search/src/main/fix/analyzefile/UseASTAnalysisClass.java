@@ -30,12 +30,7 @@ public class UseASTAnalysisClass {
 
     private static String objectName;//加的静态变量的名称
 
-    static boolean flagUseASTCheckWhetherLock = false;
 
-    //防止上一次的true结果，影响到下一次
-    public static void setFlagUseASTCheckWhetherLock(boolean flagUseASTCheckWhetherLock) {
-        UseASTAnalysisClass.flagUseASTCheckWhetherLock = flagUseASTCheckWhetherLock;
-    }
 
     public static void main(String[] args) {
 //        System.out.println(isConstructOrIsMemberVariableOrReturn(11, 12, ImportPath.examplesRootPath + "\\exportExamples\\" + ImportPath.projectName + "\\Account.java"));
@@ -124,8 +119,8 @@ public class UseASTAnalysisClass {
         return lockLine;
     }
 
-    //利用AST来添加全局静态变量，用于加全局锁
-    public static boolean useASTCheckWhetherLock(int varLoc, String filePath) {
+    //利用AST将添加的对象同步与原来的this同步合并
+    public static LockLine useASTAdjustThisLock(int firstLoc, int lastLoc, String filePath) {
 
         ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(getFileContents(new File(filePath)));
@@ -140,13 +135,21 @@ public class UseASTAnalysisClass {
                 int start = cu.getLineNumber(node.getStartPosition());
                 int end = cu.getLineNumber(node.getStartPosition() + node.getLength());
 
-                if (varLoc >= start && varLoc <= end) {
-                    flagUseASTCheckWhetherLock = true;
+                boolean flagCross = true;
+                //先找不交叉的情况
+                if(firstLoc > end || lastLoc < start){
+                    flagCross = false;
+                }
+                //交叉需要改变行数
+                if (flagCross) {
+                    lockLine.setFirstLoc(Math.min(firstLoc,start));
+                    lockLine.setLastLoc(Math.max(lastLoc,end));
                 }
                 return super.visit(node);
             }
         });
-        return flagUseASTCheckWhetherLock;
+
+        return lockLine;
     }
 
     //利用AST来添加全局静态变量，用于加全局锁

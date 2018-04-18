@@ -57,7 +57,7 @@ public abstract class DistanceBasedSearch extends Search {
             for (SearchListener listener : listeners) {
                 if (listener instanceof BasicPatternFindingListener) {
                     BasicPatternFindingListener bpfl = (BasicPatternFindingListener) listener;
-                    if (bpfl.getMod().equals(BasicPatternFindingListener.MOD.VERIFY) && correctSeqs.size() > 200) {
+                    if (bpfl.getMod().equals(BasicPatternFindingListener.MOD.VERIFY) && correctSeqs.size() > 50) {
 //                        System.out.println("---------------------------------------200 search finished---------------------------------");
                         break outer;
                     }

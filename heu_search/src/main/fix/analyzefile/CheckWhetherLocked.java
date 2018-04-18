@@ -8,7 +8,6 @@ import gov.nasa.jpf.JPF;
 public class CheckWhetherLocked {
 
     static boolean flagUseJPFCheckWhetherLock = false;//用jpf检测是否被加锁
-    static boolean flagUseASTCheckWhetherLock = false;//用jpf检测是否被加锁
 
     //要寻找的变量的位置,形式必须是   包名/java文件：行数1
     //"account/Account.java:32"
@@ -32,8 +31,6 @@ public class CheckWhetherLocked {
         jpf.run();
 //        System.out.println(checkWhetherLockedListener.isCheckFlag());
         flagUseJPFCheckWhetherLock = checkWhetherLockedListener.isCheckFlag();
-        int varLine = Integer.parseInt(variableLoc.split(":")[1]);
-        flagUseASTCheckWhetherLock = UseASTAnalysisClass.useASTCheckWhetherLock(varLine,javaFilePath);
         //一个需要对clas文件处理
         //一个对java文件处理
         //因为jpf分析不出来synchronized (this) {
@@ -43,7 +40,6 @@ public class CheckWhetherLocked {
         //所以两种方法结合
 
 
-//        return flagUseJPFCheckWhetherLock || flagUseASTCheckWhetherLock;
         return flagUseJPFCheckWhetherLock;
     }
 

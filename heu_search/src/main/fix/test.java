@@ -1,16 +1,15 @@
 package fix;
 
-import fix.analyzefile.CheckWhetherLocked;
-import fix.entity.ImportPath;
+import fix.run.Fix;
 import org.eclipse.jdt.core.dom.*;
+import p_heu.entity.ReadWriteNode;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
 
 public class Test {
 
@@ -19,9 +18,18 @@ public class Test {
 //        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
 //        System.out.println(CheckWhetherLocked.check("wrongLock/WrongLock.java:30", "value", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
 //        useASTChangeLine("D:/Patch/examples/wrongLock/wrongLock.java");
+        /*ReadWriteNode node = new ReadWriteNode(1,"accountsubtype.BusinessAccount@169","amount","READ","Thread-1","accountsubtype/PersonalAccount.java:11");
+        System.out.println(Fix.acquireLockName(node));*/
 
+//        String read = "tmp = new MyListNode(x, p._current._next);";
     }
 
+
+    static void test() {
+        while (true) {
+            System.out.println("----------==========");
+        }
+    }
 
     static void listFiles(List<File> files, File dir) {
         File[] listFiles = dir.listFiles();
@@ -33,7 +41,6 @@ public class Test {
             }
         }
     }
-
 
 
     public static void useASTChangeLine(String filePath) {
@@ -60,8 +67,8 @@ public class Test {
             public boolean visit(SimpleName node) {
 
 //                if(this.varDefInSync.contains(node.getIdentifier())){
-                    System.out.println(node.getIdentifier());
-                    System.out.println(cu.getLineNumber(node.getStartPosition()));
+                System.out.println(node.getIdentifier());
+                System.out.println(cu.getLineNumber(node.getStartPosition()));
 //                }
                 return super.visit(node);
             }

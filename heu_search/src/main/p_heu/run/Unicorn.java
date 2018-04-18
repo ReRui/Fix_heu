@@ -1,6 +1,7 @@
 package p_heu.run;
 
 import fix.entity.ImportPath;
+import fix.entity.type.VerifyType;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.JPF;
 import p_heu.entity.Node;
@@ -10,7 +11,6 @@ import p_heu.entity.sequence.Sequence;
 import p_heu.listener.SequenceProduceListener;
 import verify.run.FixVerification;
 
-import java.io.File;
 import java.util.*;
 
 public class Unicorn {
@@ -30,8 +30,8 @@ public class Unicorn {
 
         System.out.println(System.getProperty("projectName"));*/
 
-        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
-//        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
+//        System.out.println(Unicorn.getPatternCounterList(ImportPath.examplesRootPath + "/out/production/Patch"));
+        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.verifyPath + "\\generateClass"));
 //        System.out.println(Unicorn.verifyFixSuccessful(ImportPath.examplesRootPath + "\\out\\production\\Patch"));
 //        System.out.println(Unicorn.getPatternCounterList("C:\\Users\\lhr\\Desktop\\verify\\WrongLock\\outputClasses"));
 //        System.out.println(Unicorn.getPatternCounterList());
@@ -70,7 +70,11 @@ public class Unicorn {
                 files.toArray(new String[files.size()]),
                 classpath);*/
         GenerateClass.compileJava(ImportPath.verifyPath + "\\exportExamples\\" + ImportPath.projectName, classpath);
-        return FixVerification.verify(classpath);
+        if(ImportPath.verifyType == VerifyType.UNICORN){
+            return FixVerification.verifyByUnicorn(classpath);
+        } else {
+            return FixVerification.verify(classpath);
+        }
 
     }
 
