@@ -204,8 +204,29 @@ public class Fix {
 
         String lockFile = "";//用来表示加锁文件
 
+        //判断有几个变量，
+        //如果有两个变量在不在一行
+        boolean flagTwoLine = false;
+
+        if(rwnList.size() > 1){
+            String oneField = rwnList.get(0).getField();
+            String onePosition = rwnList.get(0).getPosition();
+
+            String twoField = rwnList.get(1).getField();
+            String twoPosition = rwnList.get(1).getPosition();
+
+            if(oneField.equals(twoField) && onePosition.equals(twoPosition)){
+                //同一行的同一个变量。可以当成一行处理，加锁时不影响
+                flagTwoLine = false;
+            } else {
+                flagTwoLine = true;
+            }
+        } else {//只有一个变量,
+            flagTwoLine = false;
+        }
+
         //判断A中有几个变量
-        if (rwnList.size() > 1) {//两个变量
+        if (flagTwoLine) {//两个变量,且在两行
             //如果有两个变量，需要分析
             //判断它们在不在一个函数中
             boolean flagSame = UseASTAnalysisClass.assertSameFunction(rwnList, addSyncFilePath);
@@ -276,6 +297,12 @@ public class Fix {
                 //跨类搜索
                 useSoot.getCallGraph(rwnList.get(0), rwnList.get(1));
 
+                //如果跨类没找到，就直接结束
+                if(useSoot.getSyncJava().equals(".")){
+                    lockAdjust.setOneLockFile("");//设为空，以后就不会合并了
+                    return;
+                }
+
                 //得到加锁位置
                 firstLoc = useSoot.getMinLine();
                 lastLoc = useSoot.getMaxLine();
@@ -317,6 +344,7 @@ public class Fix {
                 lastLoc = firstLoc;
                 //然后获得需要加何种锁
                 lockName = acquireLockName(node);
+                System.out.println(lockName + "lockname");
 
                 //判断加锁会不会和for循环等交叉
                 UseASTAnalysisClass.LockLine lockLine = UseASTAnalysisClass.changeLockLine(firstLoc, lastLoc, addSyncFilePath);
@@ -339,10 +367,12 @@ public class Fix {
         //便于以后调整
         if (!lockAdjust.isOneLockFinish()) {
             lockAdjust.setOneLockFile(lockFile);
+            lockAdjust.setOneLockName(lockName);
             lockAdjust.setOneFirstLoc(firstLoc);
             lockAdjust.setOneLastLoc(lastLoc + 1);
         } else {
             lockAdjust.setTwoLockFile(lockFile);
+            lockAdjust.setOneLockName(lockName);
             lockAdjust.setTwoFirstLoc(firstLoc);
             lockAdjust.setTwoLastLoc(lastLoc + 1);
         }

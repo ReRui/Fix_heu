@@ -18,7 +18,8 @@ public class Test {
     public static void main(String[] args) {
 //        useASTChangeLine(444, 448, 439, 451, "D:/Patch/examples/stringbuffer/StringBuffer.java");
 //        System.out.println(CheckWhetherLocked.check("wrongLock/WrongLock.java:30", "value", ImportPath.examplesRootPath + "/out/production/Patch", "D:\\Patch\\examples\\wrongLock\\WrongLock.java"));
-        useASTChangeLine("D:/Patch/examples/wrongLock/wrongLock.java");
+//        useASTChangeLine("D:/Patch/examples/wrongLock/wrongLock.java");
+
     }
 
 

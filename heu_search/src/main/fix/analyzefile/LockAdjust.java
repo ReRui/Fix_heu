@@ -18,12 +18,30 @@ public class LockAdjust {
     }
 
     String oneLockFile = "";//第一次加锁的文件
+    String oneLockName = "";//第一次加锁的名称
     int oneFirstLoc = 0;//第一次加锁位置
     int oneLastLoc = 0;//第一次加锁位置
 
     String twoLockFile = "";//第二次加锁的文件
+    String twoLockName = "";//第二次加锁名称
     int twoFirstLoc = 0;//第二次加锁位置
     int twoLastLoc = 0;//第二次加锁位置
+
+    public String getOneLockName() {
+        return oneLockName;
+    }
+
+    public void setOneLockName(String oneLockName) {
+        this.oneLockName = oneLockName;
+    }
+
+    public String getTwoLockName() {
+        return twoLockName;
+    }
+
+    public void setTwoLockName(String twoLockName) {
+        this.twoLockName = twoLockName;
+    }
 
     boolean oneLockFinish = false;//第一次加锁是否完成
 
@@ -115,10 +133,8 @@ public class LockAdjust {
 
     public void adjust(String filePath) {
         //后来我仔细想了想，不管锁是不是相同都要合并
-        //然后我将原来的锁名改成了加锁文件
         //只有在同一个文件里面加锁才能合并，都不同类了也不需要合并了
-//        if (oneLockFile.equals(twoLockFile)) { //两次加锁相同
-            if (cross()) {//如果交叉需要合并
+            if (cross() && oneLockFile.equals(twoLockFile)) {//如果交叉需要合并
                 if (lastEqualFirst()) {//判断某次加锁终止行是不是和另一次加锁起始行相等
                     adjustOldSync(filePath, 1);//修改原有的锁
                 } else {
@@ -183,7 +199,7 @@ public class LockAdjust {
                     //位置一定要在删除锁后面
                     if (line == finalFirstLoc) {
                         StringBuilder sb = new StringBuilder(read);
-                        sb.insert(0, "synchronized (" + oneLockFile + "){ ");
+                        sb.insert(0, "synchronized (" + oneLockName + "){ ");
                         read = sb.toString();
                     }
                     if (line == finalLastLoc) {
