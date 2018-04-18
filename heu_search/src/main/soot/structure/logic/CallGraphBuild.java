@@ -47,9 +47,9 @@ public class CallGraphBuild {
 //        System.out.println(visited1 + "11111111111111111");
 
         Set<CommonCaller> result = new HashSet<>();
-        CommonCaller caller = sameMethod(visited1, callRowRight);
-        if (caller != null) {
-            result.add(caller);
+        Set<CommonCaller> callers = sameMethod(visited1, callRowRight);
+        if (callers.size() != 0) {
+            result.addAll(callers);
             callRowRight.setExtend(true);
         }
         Set<CommonCaller> resultPart = extend(visited1, visited2);
@@ -95,9 +95,9 @@ public class CallGraphBuild {
         }
         else {
             for (MethodCallRow newCaller : newCallers) {
-                CommonCaller caller = sameMethod(visited1, newCaller);
-                if (caller != null) {
-                    result.add(caller);
+                Set<CommonCaller> callers = sameMethod(visited1, newCaller);
+                if (callers.size() != 0) {
+                    result.addAll(callers);
                 }
                 else {
                     visited2.add(newCaller);
@@ -107,15 +107,16 @@ public class CallGraphBuild {
         return result;
     }
 
-    private CommonCaller sameMethod(Set<MethodCallRow> callRows, MethodCallRow item) {
+    private Set<CommonCaller> sameMethod(Set<MethodCallRow> callRows, MethodCallRow item) {
+        Set<CommonCaller> result = new HashSet<>();
         for (MethodCallRow callRow : callRows) {
             if (callRow.getMethod().equals(item.getMethod())) {
                 if (callRow.getRow() == item.getRow()) {
                     item.setExtend(true);
                 }
-                return new CommonCaller(callRow.getMethod(), callRow.getRow(), item.getRow());
+                result.add(new CommonCaller(callRow.getMethod(), callRow.getRow(), item.getRow()));
             }
         }
-        return null;
+        return result;
     }
 }

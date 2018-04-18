@@ -40,8 +40,8 @@ public class UseSoot {
 //        ReadWriteNode rw1 = new ReadWriteNode(1, "datarace.CustomerInfo@16f", "accounts", "WRITE", "main", "datarace/Account.java:12");
 //        ReadWriteNode rw2 = new ReadWriteNode(2, "datarace.CustomerInfo@16f", "accounts", "READ", "Thread-1", "datarace/Account.java:8");
         //拿不到signature
-        ReadWriteNode rw1 = new ReadWriteNode(1, "buggyprogram.BuggyProgram@16e", "randomNumber", "WRITE", "Thread-2", "buggyprogram/BuggyProgram.java:354");
-        ReadWriteNode rw2 = new ReadWriteNode(2, "buggyprogram.BuggyProgram@16e", "randomNumber", "WRITE", "Thread-1", "buggyprogram/BuggyProgram.java:369");
+        ReadWriteNode rw1 = new ReadWriteNode(1, "alarmclock.MyLinkedList@15e", "size", "READ", "Thread-2", "alarmclock/AlarmClock.java:295");
+        ReadWriteNode rw2 = new ReadWriteNode(2, "alarmclock.MyLinkedList@15e", "size", "WRITE", "Thread-1", "alarmclock/AlarmClock.java:308");
         /*ReadWriteNode rw1 = new ReadWriteNode(1, "account2.Account@167", "Balance", "WRITE", "Thread-2", "buggyprogram/BuggyProgram.java:352");
         ReadWriteNode rw2 = new ReadWriteNode(2, "account2.Account@167", "Balance", "READ", "Thread-1", "buggyprogram/BuggyProgram.java:367");*/
 
@@ -53,34 +53,47 @@ public class UseSoot {
     }
 
     //得到函数调用图
-    public  void getCallGraph(ReadWriteNode rw1, ReadWriteNode rw2) {
+    public void getCallGraph(ReadWriteNode rw1, ReadWriteNode rw2) {
         //处理数据
-        String positionOne = rw1.getPosition();
-        String classNameOne = positionOne.split("\\.")[0].replaceAll("/", ".");
-        int classLineOne = Integer.parseInt(positionOne.split(":")[1]);
-        String positionTwo = rw2.getPosition();
-        String classNameTwo = positionTwo.split("\\.")[0].replaceAll("/", ".");
-        int classLineTwo = Integer.parseInt(positionTwo.split(":")[1]);
+        String position = rw1.getPosition();
+        String element = rw1.getElement();
+        int index = element.indexOf('@');
+        String classNameOne = index == -1 ? element : element.substring(0, index);
 
+        int classLineOne = Integer.parseInt(position.split(":")[1]);
+
+        position = rw2.getPosition();
+        index = element.indexOf('@');
+        String classNameTwo = index == -1 ? element : element.substring(0, index);
+
+        int classLineTwo = Integer.parseInt(position.split(":")[1]);
+
+        System.out.println(classNameOne + "," + classLineOne + "," + classNameTwo + "," + classLineTwo);
+//        System.exit(-1);
         //利用soot得到调用图
         Set<CommonCaller> callGraphInfo = Main.getCallGraphInfo(classNameOne, classLineOne, classNameTwo, classLineTwo);
 
-       /* System.out.println(callGraphInfo);
-        System.exit(-1);*/
+        System.out.println(callGraphInfo);
+//        System.exit(-1);
 
         for (CommonCaller caller : callGraphInfo) {
             syncJava = caller.getMethod().getClassName();
-            int tempMin = Math.min(caller.getLeftRow(),caller.getRightRow());
-            int tempMax = Math.max(caller.getLeftRow(),caller.getRightRow());
-            if(minLine > tempMin) {
+            int tempMin = Math.min(caller.getLeftRow(), caller.getRightRow());
+            int tempMax = Math.max(caller.getLeftRow(), caller.getRightRow());
+            if (minLine > tempMin) {
                 minLine = tempMin;
             }
-            if(maxLine < tempMax) {
+            if (maxLine < tempMax) {
                 maxLine = tempMax;
             }
         }
 
-        syncJava =syncJava.replaceAll("\\.","/") + ".java";
+        int indexInner = syncJava.indexOf('$');
+        if (indexInner != -1) {
+            syncJava = syncJava.substring(0, indexInner);
+        }
+        syncJava = syncJava.replaceAll("\\.", "/") + ".java";
+
 
     }
 }
