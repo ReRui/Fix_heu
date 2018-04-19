@@ -322,7 +322,6 @@ public class Fix {
 
                 //如果跨类没找到，就直接结束
                 if (useSoot.getSyncJava().equals(".")) {
-                    System.out.println("this here");
                     lockAdjust.setOneLockFile("");//设为空，以后就不会合并了
                     return;
                 }

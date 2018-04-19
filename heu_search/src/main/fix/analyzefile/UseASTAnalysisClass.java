@@ -160,10 +160,13 @@ public class UseASTAnalysisClass {
         BufferedReader br = null;
         String read = "";
         int index = 1;
+        String[] split = filePath.split("/");
+        String className = split[split.length - 1].split("\\.")[0];
+
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "GBK"));
             while (((read = br.readLine()) != null)) {
-                if (read.contains("class")) {
+                if (read.contains("class") && read.contains(className)) {
                     break;
                 } else {
                     index++;
