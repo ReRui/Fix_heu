@@ -48,10 +48,15 @@ public class Fix {
 
     public static void main(String[] args) {
         startUnicornTime = System.currentTimeMillis();
-        fix(FixType.firstFix);
+        try {
+            fix(FixType.firstFix);
+        }catch (Exception e){
+
+        }finally {
+            endFixTime = System.currentTimeMillis();
+            System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
+        }
 //        fix(FixType.iterateFix);
-        endFixTime = System.currentTimeMillis();
-        System.out.println("修复需要的时间:" + (endFixTime - startFixTime));
 
     }
 
@@ -88,7 +93,7 @@ public class Fix {
         //将所有的pattern打印出来，方便以后选择
         System.out.println(tempList);
 
-        System.out.println("如果没有找到pattern请重新开始");
+        System.out.println("如果没有找到，请重新开始");
         System.out.print("输入准确的pattern（最下面的是0）：");
         //此处需要手动选择
         Scanner sc = new Scanner(System.in);
